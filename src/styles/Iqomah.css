@@ -1,0 +1,51 @@
+.iqomah-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: black;
+    color: white;
+    text-align: center;
+    padding: 20px; /* Add padding for better spacing on smaller screens */
+    box-sizing: border-box;
+}
+
+.iqomah-title {
+    font-size: 4rem; /* Slightly larger font size for the title */
+    font-weight: bold;
+    color: #4a90e2; /* Soft Blue for a calming effect */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Subtle shadow for visibility */
+    margin-bottom: 10px; /* Reduce spacing below the title */
+}
+
+.iqomah-prayer-name {
+    font-size: 2.5rem; /* Adjust font size for the prayer name */
+    font-weight: bold;
+    color: #f4c542; /* Golden Yellow for a softer highlight */
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7); /* Subtle shadow for visibility */
+    margin-bottom: 10px; /* Reduce spacing below the prayer name */
+}
+
+.iqomah-countdown {
+    font-size: 10rem; /* Larger font size for the countdown */
+    font-weight: bold;
+    color: white; /* Keep the countdown text white for focus */
+    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7); /* Stronger shadow for emphasis */
+    margin: 0; /* Remove extra margin to center the countdown */
+}
+
+/* Adjust for smaller screens */
+@media (max-width: 768px) {
+    .iqomah-title {
+        font-size: 3rem; /* Adjust title size for smaller screens */
+    }
+
+    .iqomah-prayer-name {
+        font-size: 2rem; /* Adjust prayer name size for smaller screens */
+    }
+
+    .iqomah-countdown {
+        font-size: 6rem; /* Adjust countdown size for smaller screens */
+    }
+}

@@ -1,0 +1,211 @@
+.tv-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--primary-color); /* Warna utama */
+    overflow: hidden;
+    position: relative;
+}
+
+.background-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: calc(100% - 60px); /* Kurangi tinggi running-text */
+    overflow: hidden;
+    position: relative;
+}
+
+.youtube-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+.unsplash-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.youtube-container {
+    flex: 1;
+    width: 100%;
+    position: relative;
+}
+
+.youtube-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+.prayer-times-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 columns */
+    gap: 15px; /* Increase spacing between boxes */
+    background-color: var(--primary-color-transparent); /* Warna utama */
+    padding: 15px;
+    /* position: absolute; */
+    position: relative;
+    bottom: 60px; /* Place it just above the running text */
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.prayer-times-box {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 15px;
+    text-align: center;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    font-size: 20px; /* Increase font size */
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+}
+
+.current-time-box {
+    background-color: rgba(0, 128, 0, 0.8); /* Highlight the current time box */
+    color: white;
+    font-size: 22px; /* Slightly larger font size for the current time */
+    font-weight: bold;
+    border: 2px solid white;
+}
+
+.running-text-container {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 60px;
+    background-color: var(--primary-color); /* Warna utama */
+    color: white;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.running-text {
+    white-space: nowrap;
+    position: absolute;
+    animation: runText 30s linear infinite;
+    font-size: 28px;
+    font-weight: bold;
+    color: #ffffff;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+    padding-left: 10px;
+}
+
+@keyframes runText {
+    0% {
+        transform: translateX(100%);
+    }
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
+.mosque-name {
+    text-align: center;
+    font-size: 36px; /* Increased font size */
+    font-weight: bold;
+    color: white;
+    background-color: var(--primary-color); /* Warna utama */
+    padding: 15px; /* Increased padding for better spacing */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Slightly larger shadow for emphasis */
+    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.unsplash-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.unsplash-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.unsplash-attribution {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    background-color: var(--primary-color); /* Warna utama */
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 0.5rem;
+    text-align: right;
+}
+
+.unsplash-attribution a {
+    color: #00bcd4;
+    text-decoration: none;
+}
+
+.unsplash-attribution a:hover {
+    text-decoration: underline;
+}
+
+.daily-content {
+    position: absolute;
+    top: 50%; /* Center vertically */
+    left: 50%; /* Center horizontally */
+    transform: translate(-50%, -50%); /* Adjust for centering */
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 20px 40px; /* Increased padding for better spacing */
+    border-radius: 15px; /* Slightly larger border radius */
+    text-align: center;
+    max-width: 90%; /* Allow more space for larger text */
+    z-index: 2; /* Ensure it appears above other elements */
+}
+
+.daily-text {
+    font-size: 2.5rem; /* Increased font size for better visibility */
+    font-weight: bold;
+    margin-bottom: 10px; /* Increased spacing between text and translation */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Add shadow for better readability */
+}
+
+.daily-translation {
+    font-size: 1.8rem; /* Increased font size for better visibility */
+    font-style: italic;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7); /* Add shadow for better readability */
+}
+
+/* Tombol X */
+.close-button {
+    position: absolute;
+    top: 10px; /* Jarak dari atas */
+    right: 10px; /* Jarak dari kanan */
+    background-color: #ff4d4d; /* Warna merah */
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px; /* Lebar tombol */
+    height: 30px; /* Tinggi tombol */
+    font-size: 1rem; /* Ukuran font */
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    transition: opacity 0.3s ease, transform 0.2s ease, background-color 0.3s ease;
+    opacity: 0; /* Awalnya tidak terlihat */
+    pointer-events: none; /* Nonaktifkan interaksi */
+}
+
+/* Hover pada mosque-name untuk memunculkan tombol X */
+.mosque-name:hover .close-button {
+    opacity: 1; /* Munculkan tombol */
+    pointer-events: auto; /* Aktifkan interaksi */
+}
