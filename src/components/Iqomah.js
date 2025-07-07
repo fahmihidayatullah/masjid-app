@@ -5,15 +5,23 @@ const IqomahCountdown = ({ prayerName, iqomahTime, onCountdownComplete }) => { /
     const [timeLeft, setTimeLeft] = useState(iqomahTime); // 5 minutes in seconds
     const [audio, setAudio] = useState(null);
 
+    // Deteksi Sholat Jumat
+    const isFriday = new Date().getDay() === 5;
+    const isJumatPrayer = isFriday && (prayerName === 'Dzuhur' || prayerName === "Jum'at");
+
+
     useEffect(() => {
-        // Initialize the audio object
-        const audioInstance = new Audio('/assets/beep.mp3'); // Ensure the file is in the public/assets folder
-        setAudio(audioInstance);
-    }, []);
+        if (!isJumatPrayer) {
+            const audioInstance = new Audio('/assets/beep.mp3');
+            setAudio(audioInstance);
+        }
+    }, [isJumatPrayer]);
 
     useEffect(() => {
         if (timeLeft <= 0) {
-            playBeepSound();
+            if (!isJumatPrayer) { // Play beep sound only if it's not Friday's prayer
+                playBeepSound();
+            }
             setTimeLeft(0); // Stop countdown at 0
             if (onCountdownComplete) {
                 onCountdownComplete(); // Call the function passed as a prop
@@ -44,18 +52,26 @@ const IqomahCountdown = ({ prayerName, iqomahTime, onCountdownComplete }) => { /
                     audio.play().catch((err) => {
                         console.error('Audio playback failed:', err);
                     });
-                }, i * 500); // Play beep every 500ms
+                }, i * 1500); // play beep every 1s 500ms
             }
         }
     };
 
-    return (
+    if (isJumatPrayer) {
+        return (
+            <div className="iqomah-container" style={{ background: 'black', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+                <h1 style={{ fontSize: '6rem', width: '100%', textAlign: 'center' }}>Waktu Sholat Jum'at</h1>
+            </div>
+        );
+    } else {
+        return (
         <div className="iqomah-container">
             <h1 className="iqomah-title">Time to Iqomah</h1>
             <h2 className="iqomah-prayer-name">{prayerName}</h2>
             <h2 className="iqomah-countdown">{formatTime(timeLeft)}</h2>
         </div>
     );
+    }
 };
 
 export default IqomahCountdown;

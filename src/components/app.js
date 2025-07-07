@@ -1,34 +1,60 @@
 import React, { useState, useEffect } from 'react';
 import TvDisplay from './TvDisplay';
+import Main from './Main';
 import IqomahCountdown from './Iqomah';
 import Setting from './setting';
 import '../styles/app.css'; // Import your CSS file for styling
 import logo from '../assets/logo.png'; // Import your logo image
+import config from './config'; // Import your configuration file
 
 const App = () => {
     const [currentPage, setCurrentPage] = useState('welcome'); // 'countdown', 'shaf', 'blank', 'tv'
     const [currentIqomahTime, setCurrentIqomahTime] = useState(0);
     const [currentPrayerName, setCurrentPrayerName] = useState('');
+    
     const [mosqueName, setMosqueName] = useState(() => {
-      return localStorage.getItem('mosqueName') || 'Masjid';
+      return localStorage.getItem('mosqueName') || config.mosqueName;
     });
     const [runningText, setRunningText] = useState(() => {
-      return localStorage.getItem('runningText') || 'Jadwal Sholat Masjid';
+      return localStorage.getItem('runningText') || config.runningText;
     });
+    const [youtubeUrl, setYoutubeUrl] = useState(
+        localStorage.getItem('youtubeUrl') || config.youtubeUrl || ''
+    );
+    const getIqomahTimes = () => {
+    const saved = localStorage.getItem('iqomahTimes');
+    if (saved) {
+        try {
+        return JSON.parse(saved);
+        } catch {
+        return config.iqomahTimes;
+        }
+    }
+    return config.iqomahTimes;
+    };
+
+    const [iqomahTimes, setIqomahTimes] = useState(getIqomahTimes());
 
     useEffect(() => {
         let timer;
-
-        if (currentPage === 'shaf') {
-            // Show "Rapatkan Shaf!" page for 10 seconds
-            timer = setTimeout(() => {
+        // Deteksi Sholat Jumat
+        const isFriday = new Date().getDay() === 5;
+        const isJumatPrayer = isFriday && (currentPrayerName === 'Dzuhur' || currentPrayerName === "Jum'at");
+        if (currentPage === 'shaf' ) {
+            if (isJumatPrayer) {
+                timer = setTimeout(() => {
                 setCurrentPage('blank');
-            }, 10000);
+            }, 30 * 60 * 1000); // Show "Diam waktu Khutbah!" page for 20 minutes
+            } else {
+                timer = setTimeout(() => {
+                setCurrentPage('blank');
+            }, 10 * 1000); // Show "Rapatkan Shaf!" page for 10 second
+            }
+            
         } else if (currentPage === 'blank') {
-            // Show blank page for 5 detik
             timer = setTimeout(() => {
-                setCurrentPage('tv');
-            }, 5 * 1000);
+                setCurrentPage('main');
+            }, 10 * 60 * 1000); // 15 minutes for "blank" page
         }
 
         return () => clearTimeout(timer); // Cleanup timer on component unmount
@@ -52,7 +78,10 @@ const App = () => {
               <h1 className="welcome-text">Bismillah, saya akan memulai aplikasi Masjid App</h1>
               <div className="button-container">
                   <button className="welcome-button" onClick={() => setCurrentPage('tv')}>
-                      OK
+                      OK {iqomahTimes[0]}
+                  </button>
+                  <button className="welcome-button" onClick={() => setCurrentPage('main')}>
+                      Main
                   </button>
                   <button className="welcome-button" onClick={() => setCurrentPage('setting')}>
                       Setting
@@ -73,10 +102,15 @@ const App = () => {
     }
 
     if (currentPage === 'shaf') {
+        // Deteksi Sholat Jumat
+    const isFriday = new Date().getDay() === 5;
+    const isJumatPrayer = isFriday && (currentPrayerName === 'Dzuhur' || currentPrayerName === "Jum'at");
         return (
-          <div className="shaf-container">
-              <h1 className="shaf-text">Rapatkan Shaf!</h1>
-          </div>
+        <div className="shaf-container" style={{ background: 'black', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <h1 className="shaf-text" style={{ color: 'white', fontSize: '7rem', textAlign: 'center' }}>
+                {isJumatPrayer ? 'Diam saat khutbah!' : 'Rapatkan Shaf!'}
+            </h1>
+        </div>
         );
     }
 
@@ -92,6 +126,16 @@ const App = () => {
         setCurrentPage={setCurrentPage} />;
     }
 
+    if (currentPage === 'main') {
+      return <Main 
+        mosqueName={mosqueName} // Pass the mosque name to Main
+        onPrayerTime={handlePrayerTime}
+        runningText={runningText}
+        setCurrentPage={setCurrentPage} 
+        iqomahTimes={iqomahTimes}
+        />;
+    }
+
     if (currentPage === 'setting') {
         return (
             <Setting
@@ -100,6 +144,10 @@ const App = () => {
                 runningText={runningText}
                 setRunningText={setRunningText} // Pass the setter function to the Setting component
                 setCurrentPage={setCurrentPage} // Pass the setter function to navigate back to TV display
+                iqomahTimes={iqomahTimes}
+                setIqomahTimes={setIqomahTimes}
+                youtubeUrl={youtubeUrl}
+                setYoutubeUrl={setYoutubeUrl} // Pass the setter function to the Setting component
             />
         );
     }

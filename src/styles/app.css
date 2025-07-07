@@ -12,15 +12,15 @@
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-color: var(--primary-color); /* Warna utama */
+    background-color: var(black); /* Warna utama */
 }
 
 .shaf-text {
-    color: var(--secondary-color); /* Warna sekunder */
+    color: var(white); /* Warna sekunder */
     font-size: clamp(10vw, 5vw, 100px); /* Font size with a maximum limit */
     text-align: center;
     font-weight: bold;
-    text-shadow: 2px 2px 5px rgba(7, 105, 23, 0.7);
+    /* text-shadow: 2px 2px 5px rgba(7, 105, 23, 0.7); */
 }
 
 .welcome-container {

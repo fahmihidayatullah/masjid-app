@@ -56,7 +56,7 @@ body {
 .setting-input,
 .setting-textarea {
     width: 100%;
-    padding: 12px; /* Padding untuk kenyamanan */
+    padding: 10px; /* Padding untuk kenyamanan */
     font-size: 1rem; /* Ukuran font yang proporsional */
     border: 1px solid #ccc;
     border-radius: 8px; /* Sudut membulat */

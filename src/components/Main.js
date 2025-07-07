@@ -1,15 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import '../styles/Main.css';
 import config from './config';
 import moment from 'moment-hijri';
+import 'moment/locale/id'; // Import Indonesian locale for moment.js
 
-const Main = ({ mosqueName, onPrayerTime, runningText, setCurrentPage }) => {
+const Main = ({ mosqueName, onPrayerTime, runningText, setCurrentPage, iqomahTimes }) => {
     const [currentBackground, setCurrentBackground] = useState('youtube');
     const [unsplashImage, setUnsplashImage] = useState(''); // State to store Unsplash image URL
     const [dailyContent, setDailyContent] = useState(null); // State to store daily ayat or hadith
-    const [accessKey] = useState(config.accessKey);
-    const [youtubeUrl] = useState(config.youtubeUrl);
+    const [accessKey] = useState(config.accessKeyUnsplash);
+    const [youtubeUrl] = useState(
+        localStorage.getItem('youtubeUrl') || ''
+    );
     const [currentTime, setCurrentTime] = useState(new Date());
+    const isFriday = currentTime.getDay() === 5; // 5 = Jum'at
     const [timeToNextPrayer, setTimeToNextPrayer] = useState('');
     const [nameToNextPrayer, setNameToNextPrayer] = useState('');
     const [prayerTimes, setPrayerTimes] = useState({}); // State for prayer times
@@ -17,13 +21,37 @@ const Main = ({ mosqueName, onPrayerTime, runningText, setCurrentPage }) => {
         hijriyah: moment().format('iD/iM/iYYYY'), // Hijri date
         masehi: moment().format('DD-MM-YYYY'), // Gregorian date
     });
-    const [photographer, setPhotographer] = useState(null); // State to store photographer info
+    const [photographer, setPhotographer] = useState(null); // State to store photographer
+    const hijriMonthsLatin = [
+    "Muharram",
+    "Safar",
+    "Rabiul Awal",
+    "Rabiul Akhir",
+    "Jumadil Awal",
+    "Jumadil Akhir",
+    "Rajab",
+    "Syaban",
+    "Ramadhan",
+    "Syawwal",
+    "Dzulqaidah",
+    "Dzulhijjah"
+    ];
+
+    function getHijriLatin() {
+    const iDate = moment();
+    const day = iDate.iDate();
+    const month = hijriMonthsLatin[iDate.iMonth()];
+    const year = iDate.iYear();
+    return `${day} ${month} ${year}`;
+    }
 
     useEffect(() => {
         // Update the date every second
         const updateDate = () => {
-            const masehiDate = moment().format('dddd, DD MMMM YYYY'); // Format Masehi date
-            const hijriyahDate = moment().format('iD iMMMM iYYYY'); // Format Hijriyah date
+            moment.locale('id'); // set locale ke Indonesia
+            const masehiDate = moment().format('dddd, DD MMMM YYYY'); // Tanggal masehi dalam bahasa Indonesia
+            // Format Hijriyah dengan angka latin dan nama bulan latin
+            const hijriyahDate = getHijriLatin();
             setCurrentDate({ masehi: masehiDate, hijriyah: hijriyahDate });
         };
 
@@ -34,26 +62,37 @@ const Main = ({ mosqueName, onPrayerTime, runningText, setCurrentPage }) => {
     }, []);
 
     const fetchPrayerTimes = async (date) => {
-        try {
-            const response = await fetch(`https://api.myquran.com/v2/sholat/jadwal/1301/${date}`);
-            const data = await response.json();
-
-            if (data && data.data && data.data.jadwal) {
-                const jadwal = data.data.jadwal;
-                setPrayerTimes({
-                    Subuh: jadwal.subuh,
-                    Terbit: jadwal.terbit,
-                    Dhuha: jadwal.dhuha,
-                    Dzuhur: jadwal.dzuhur,
-                    Ashar: jadwal.ashar,
-                    Maghrib: jadwal.maghrib,
-                    Isya: jadwal.isya,
-                });
-            }
-        } catch (error) {
-            console.error('Error fetching prayer times:', error);
+    try {
+        // Cek localStorage dulu
+        const localKey = `prayerTimes-${date}`;
+        const saved = localStorage.getItem(localKey);
+        if (saved) {
+            setPrayerTimes(JSON.parse(saved));
+            return;
         }
-    };
+
+        // Jika belum ada di localStorage, fetch dari API
+        const response = await fetch(`https://api.myquran.com/v2/sholat/jadwal/1301/${date}`);
+        const data = await response.json();
+
+        if (data && data.data && data.data.jadwal) {
+            const jadwal = data.data.jadwal;
+            const times = {
+                Subuh: jadwal.subuh,
+                Terbit: jadwal.terbit,
+                Dhuha: jadwal.dhuha,
+                Dzuhur: jadwal.dzuhur,
+                Ashar: jadwal.ashar,
+                Maghrib: jadwal.maghrib,
+                Isya: jadwal.isya,
+            };
+            setPrayerTimes(times);
+            localStorage.setItem(localKey, JSON.stringify(times));
+        }
+    } catch (error) {
+        console.error('Error fetching prayer times:', error);
+    }
+};
 
     useEffect(() => {
         // Fetch a random image from Unsplash
@@ -92,11 +131,22 @@ const Main = ({ mosqueName, onPrayerTime, runningText, setCurrentPage }) => {
         const interval = setInterval(() => {
             setCurrentBackground((prev) => {
                 if (prev === 'youtube') {
-                    fetchUnsplashImage(); // Fetch a new image when switching to Unsplash
+                    fetchUnsplashImage();
+                    // Pilih daily content baru setiap kali masuk ke unsplash
+                    const randomIndex = Math.floor(Math.random() * contentList.length);
+                    setDailyContent(contentList[randomIndex]);
+                }
+                // Jika youtubeUrl kosong, langsung ke unsplash
+                if (!youtubeUrl) {
+                    fetchUnsplashImage();
+                    // Pilih daily content baru setiap kali masuk ke unsplash
+                    const randomIndex = Math.floor(Math.random() * contentList.length);
+                    setDailyContent(contentList[randomIndex]);
+                    return 'unsplash';
                 }
                 return prev === 'youtube' ? 'unsplash' : 'youtube';
             });
-        }, 1 * 20 * 1000); // 5 minutes in milliseconds
+        }, 5 * 60 * 1000); // Switch background every 2 minutes
 
         return () => clearInterval(interval); // Cleanup interval on component unmount
     }, []);
@@ -112,37 +162,18 @@ const Main = ({ mosqueName, onPrayerTime, runningText, setCurrentPage }) => {
         fetchPrayerTimes(todaydate);
     }, []); // Run once on component mount
 
-    // Iqomah times in seconds (0 means no Iqomah for that prayer)
-    const iqomahTimes = {
-        Subuh: 600, // 10 minutes
-        Terbit: 0,  // No Iqomah
-        Dhuha: 0,   // No Iqomah
-        Dzuhur: 600, // 10 minutes
-        Ashar: 600, // 10 minutes
-        Maghrib: 300, // 5 minutes
-        Isya: 300, // 5 minutes
-    };
-
     const contentList = [
-        { type: "ayat", text: "إِنَّ مَعَ الْعُسْرِ يُسْرًا", translation: "Sesungguhnya bersama kesulitan ada kemudahan. (QS. Al-Insyirah: 6)" },
-        { type: "ayat", text: "وَأَقِمِ ٱلصَّلَوٰةَ إِنَّ ٱلصَّلَوٰةَ تَنْهَىٰ عَنِ ٱلْفَحْشَآءِ وَٱلْمُنكَرِ", translation: "Dirikanlah sholat, karena sholat mencegah dari perbuatan keji dan mungkar. (QS. Al-‘Ankabut: 45)" },
-        { type: "ayat", text: "ٱهْدِنَا ٱلصِّرَٰطَ ٱلْمُسْتَقِيمَ", translation: "Tunjukilah kami jalan yang lurus. (QS. Al-Fatihah: 6)" },
-        { type: "ayat", text: "فَاذْكُرُونِي أَذْكُرْكُمْ", translation: "Ingatlah kepada-Ku, niscaya Aku ingat (pula) kepadamu. (QS. Al-Baqarah: 152)" },
-        { type: "ayat", text: "يَٰٓأَيُّهَا ٱلَّذِينَ ءَامَنُوا۟ ٱسْتَعِينُوا۟ بِٱلصَّبْرِ وَٱلصَّلَوٰةِ", translation: "Wahai orang-orang yang beriman! Mohonlah pertolongan dengan sabar dan shalat. (QS. Al-Baqarah: 153)"},
-        { type: "hadist", text: "الدِّينُ النَّصِيحَةُ", translation: "Agama adalah nasihat. (HR. Muslim)" },
-        { type: "hadist", text: "إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ", translation: "Sesungguhnya setiap amal tergantung pada niatnya. (HR. Bukhari & Muslim)" },
-        { type: "hadist", text: "مَنْ لاَ يَرْحَمْ لاَ يُرْحَمْ", translation: "Barangsiapa tidak menyayangi, maka tidak akan disayangi. (HR. Bukhari)" },
-        { type: "hadist", text: "خَيْرُ النَّاسِ أَنْفَعُهُمْ لِلنَّاسِ", translation: "Sebaik-baik manusia adalah yang paling bermanfaat bagi manusia lainnya. (HR. Ahmad)" },
-        { type: "hadist", text: "سَبْعَةٌ يُظِلُّهُمُ اللَّهُ فِي ظِلِّهِ...", translation: "Ada tujuh golongan yang Allah naungi di hari tiada naungan selain naungan-Nya... (HR. Bukhari & Muslim)" }
+        { type: "ayat", text: "إِنَّ مَعَ الْعُسْرِ يُسْرًا", translation: "Sesungguhnya bersama kesulitan ada kemudahan.",  source: "(QS. Al-Insyirah: 6)" },
+        { type: "ayat", text: "وَأَقِمِ ٱلصَّلَوٰةَ إِنَّ ٱلصَّلَوٰةَ تَنْهَىٰ عَنِ ٱلْفَحْشَآءِ وَٱلْمُنكَرِ", translation: "Dirikanlah sholat, karena sholat mencegah dari perbuatan keji dan mungkar.",  source: "(QS. Al-‘Ankabut: 45)" },
+        { type: "ayat", text: "ٱهْدِنَا ٱلصِّرَٰطَ ٱلْمُسْتَقِيمَ", translation: "Tunjukilah kami jalan yang lurus.",  source: "(QS. Al-Fatihah: 6)" },
+        { type: "ayat", text: "فَاذْكُرُونِي أَذْكُرْكُمْ", translation: "Ingatlah kepada-Ku, niscaya Aku ingat (pula) kepadamu.",  source: "(QS. Al-Baqarah: 152)" },
+        { type: "ayat", text: "يَٰٓأَيُّهَا ٱلَّذِينَ ءَامَنُوا۟ ٱسْتَعِينُوا۟ بِٱلصَّبْرِ وَٱلصَّلَوٰةِ", translation: "Wahai orang-orang yang beriman! Mohonlah pertolongan dengan sabar dan shalat.",  source: "(QS. Al-Baqarah: 153)"},
+        { type: "hadist", text: "الدِّينُ النَّصِيحَةُ", translation: "Agama adalah nasihat.",  source: "(HR. Muslim)" },
+        { type: "hadist", text: "إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ", translation: "Sesungguhnya setiap amal tergantung pada niatnya.",  source: "(HR. Bukhari & Muslim)" },
+        { type: "hadist", text: "مَنْ لاَ يَرْحَمْ لاَ يُرْحَمْ", translation: "Barangsiapa tidak menyayangi, maka tidak akan disayangi.",  source: "(HR. Bukhari)" },
+        { type: "hadist", text: "خَيْرُ النَّاسِ أَنْفَعُهُمْ لِلنَّاسِ", translation: "Sebaik-baik manusia adalah yang paling bermanfaat bagi manusia lainnya.",  source: "(HR. Ahmad)" },
+        { type: "hadist", text: "سَبْعَةٌ يُظِلُّهُمُ اللَّهُ فِي ظِلِّهِ...", translation: "Ada tujuh golongan yang Allah naungi di hari tiada naungan selain naungan-Nya.",  source: "(HR. Bukhari & Muslim)" }
     ];
-
-    useEffect(() => {
-        // Select daily content based on the day of the year
-        const today = new Date();
-        const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
-        const selectedContent = contentList[dayOfYear % contentList.length]; // Rotate through contentList
-        setDailyContent(selectedContent);
-    }, []);
 
     // Update the current time every second
     useEffect(() => {
@@ -160,7 +191,7 @@ const Main = ({ mosqueName, onPrayerTime, runningText, setCurrentPage }) => {
             (key) => prayerTimes[key] === now
         );
 
-        if (prayerName && iqomahTimes[prayerName] > 0) {
+        if (prayerName && (iqomahTimes[prayerName] || 0)> 0) {
             onPrayerTime(prayerName, iqomahTimes[prayerName]); // Call the function when 'Now' matches a prayer time with Iqomah
         }
     }, [currentTime, onPrayerTime, prayerTimes, iqomahTimes]);
@@ -197,9 +228,11 @@ const Main = ({ mosqueName, onPrayerTime, runningText, setCurrentPage }) => {
             nextPrayerDate.setHours(nextHour, nextMinute, 0, 0);
 
             const diff = nextPrayerDate - currentTime;
-            const hours = Math.floor(diff / (1000 * 60 * 60));
-            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            let totalSeconds = Math.ceil(diff / 1000);
+            const hours = Math.floor(totalSeconds / 3600);
+            totalSeconds %= 3600;
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
 
             setTimeToNextPrayer(
                 `${hours > 0 ? `${hours}h ` : ''}${minutes}m ${seconds}s`
@@ -226,117 +259,173 @@ const Main = ({ mosqueName, onPrayerTime, runningText, setCurrentPage }) => {
 
         // If 'Now' is after the last prayer time, add it to the beginning
         if (!inserted) {
-            const tomorrow = new Date(currentTime);
-            tomorrow.setDate(currentTime.getDate() + 1);
-            const year = tomorrow.getFullYear();
-            const month = String(tomorrow.getMonth() + 1).padStart(2, '0'); // Add leading zero
-            const day = String(tomorrow.getDate()).padStart(2, '0'); // Add leading zero
-            const tomorrowDate = `${year}-${month}-${day}`;
-            fetchPrayerTimes(tomorrowDate);
             times.splice(0, 0, ['now', now]);
         }
 
         return times;
     };
 
+    useEffect(() => {
+    // Jika waktu sudah melewati semua jadwal hari ini, fetch jadwal besok
+    const times = Object.entries(prayerTimes);
+    const now = currentTime.toTimeString().slice(0, 5);
+    const lastTime = times.length ? times[times.length - 1][1] : null;
+
+    if (lastTime && now > lastTime) {
+        const tomorrow = new Date(currentTime);
+        tomorrow.setDate(currentTime.getDate() + 1);
+        const year = tomorrow.getFullYear();
+        const month = String(tomorrow.getMonth() + 1).padStart(2, '0');
+        const day = String(tomorrow.getDate()).padStart(2, '0');
+        const tomorrowDate = `${year}-${month}-${day}`;
+        fetchPrayerTimes(tomorrowDate);
+    }
+}, [currentTime, prayerTimes]);
+
     const shiftedPrayerTimes = getShiftedPrayerTimes();
 
-    return (
-        <div className="main-container">
-            {/* Left Section: YouTube or Unsplash */}
-            <div className="main-left">
-                {youtubeUrl ? (
-                    <iframe
-                        src={youtubeUrl}
-                        title="YouTube Video"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                        className="youtube-iframe"
-                    ></iframe>
-                ) : (
-                    <div className="unsplash-container">
-                        <img
-                            src={unsplashImage}
-                            alt="Unsplash Background"
-                            className="unsplash-image"
-                        />
-                        {dailyContent && (
-                            <div className="daily-content">
-                                <p className="daily-text">{dailyContent.text}</p>
-                                <p className="daily-translation">{dailyContent.translation}</p>
-                                {photographer && (
-                                    <p className="unsplash-attribution">
-                                        Photo by <a href={photographer.link} target="_blank" rel="noopener noreferrer">{photographer.name}</a> on <a href="https://unsplash.com" target="_blank" rel="noopener noreferrer">Unsplash</a>
-                                    </p>
-                                )}
-                            </div>
-                        )}
-                    </div>
-                )}
-            </div>
+    const runningTexts = [
+        "Masjid Al Muqorrobin menerima Infaq dan Shodaqoh Jama'ah melalui nomor rekening BSI: 7720004008 a.n. Masjid Al Muqorrobin",
+        "Hai orang-orang beriman, apabila diseru untuk menunaikan shalat Jum'at, maka bersegeralah kamu kepada mengingat Allah dan tinggalkanlah jual beli. Yang demikian itu lebih baik bagimu jika kamu mengetahui.",
+        "Dan di hari Jum'at pahala bersedekah dilipatgandakan (HR. Ibnu Khuzaimah)."
+    ];
 
-            {/* Right Section: Mosque Info */}
-            <div className="main-right">
-                <div className="mosque-info">
-                    <h1 className="mosque-name">{mosqueName}</h1>
-                    <p className="current-date">{currentDate.masehi}</p>
-                    <p className="current-date">{currentDate.hijriyah}</p>
-                </div>
-                <div className="prayer-times">
-                    {/* <h2>Prayer Times</h2> */}
-                    {Object.entries(prayerTimes).map(([prayer, time]) => (
-                        <div key={prayer} className="prayer-time">
-                            <span className="prayer-name">{prayer}</span>
-                            <span className="prayer-time-value">{time}</span>
-                        </div>
-                    ))}
-                </div>
-            </div>
+    const [runningTextIndex, setRunningTextIndex] = useState(0);
+    const [animateKey, setAnimateKey] = useState(0);
 
-            {/* Prayer Times Section */}
-            <div className="prayer-times-container">
-                {shiftedPrayerTimes.map(([prayer, time], index) => (
-                    <div
-                        key={prayer}
-                        className={`prayer-times-box ${
-                            prayer === 'now' ? 'current-time-box' : ''
-                        }`}
-                    >
-                        {prayer === 'now' ? (
-                            <div>
-                                <div>Now: {time}</div>
-                                <div>Next {nameToNextPrayer}: {timeToNextPrayer}</div>
-                            </div>
-                        ) : (
-                            <div>
-                                <div>{prayer}</div>
-                                <div>{time}</div>
-                            </div>
-                        )}
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
+    useEffect(() => {
+    // Hitung durasi animasi berdasarkan panjang teks (misal: 0.12s per karakter, min 6s, max 20s)
+    const textLength = runningTexts[runningTextIndex]?.length || 0;
+    const duration = Math.min(Math.max(textLength * 200, 10000), 30000);
+
+    // Set animasi CSS variable
+    if (carouselRef.current) {
+        carouselRef.current.style.setProperty('--running-text-duration', `${duration}ms`);
+    }
+
+    // Timer untuk ganti teks setelah animasi selesai
+    const timer = setTimeout(() => {
+        setRunningTextIndex(prev => (prev + 1) % runningTexts.length);
+        setAnimateKey(prev => prev + 1); // paksa re-render span agar animasi ulang
+    }, duration);
+
+    return () => clearTimeout(timer);
+}, [runningTextIndex, runningTexts.length]);
+
+    const [isOverflow, setIsOverflow] = useState(false);
+    const carouselRef = useRef(null);
+
+    useEffect(() => {
+        const checkOverflow = () => {
+            if (carouselRef.current) {
+                // setIsOverflow(carouselRef.current.scrollWidth > carouselRef.current.clientWidth);
+                carouselRef.current.scrollLeft = 0; // Reset scroll position to the start
+            }
+        };
+        checkOverflow();
+        window.addEventListener('resize', checkOverflow);
+        return () => window.removeEventListener('resize', checkOverflow);
+    }, [runningTexts, runningTextIndex]);
 
     return (
-        <div className="tv-container">
-            {/* Mosque Name */}
-            <div className="mosque-name">
-                {mosqueName}
+        <div className="main-tv-container">
+            <div className="main-mosque-header">
+            <div className="main-header-date">
+                <div className="main-current-masehi">{currentDate.masehi} M</div>
+                <div className="main-current-hijriyah">{currentDate.hijriyah} H</div>
+            </div>
+            <div className="main-mosque-name-area">{mosqueName}</div>
+            <div className="main-header-time">
+                <span className="main-header-hourmin">
+                    {currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                </span>
+                <span className="main-header-second">
+                    {currentTime
+                        .getSeconds()
+                        .toString()
+                        .padStart(2, '0')}
+                </span>
                 <button
-                    className="close-button"
-                    onClick={() => setCurrentPage('welcome')}
+                    className="close-header-btn"
+                    onClick={() => setCurrentPage && setCurrentPage('welcome')}
+                    title="Kembali ke Home"
                 >
                     X
                 </button>
             </div>
+        </div>
 
-
-            {/* Running text */}
-            <div className="running-text-container">
-                <div className="running-text">{runningText}</div>
+            {/* Content Area */}
+            <div className="main-content-area">
+                <div className="main-background-container">
+                    {currentBackground === 'youtube' && youtubeUrl ? (
+                        <iframe
+                            src={youtubeUrl}
+                            title="Makkah Live Stream"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                            className="main-youtube-iframe"
+                        />
+                    ) : null}
+                    {((currentBackground === 'unsplash') || (currentBackground === 'youtube' && !youtubeUrl)) && unsplashImage && (
+                        <div className="main-unsplash-wrapper" style={{ width: '100%', height: '100%', position: 'relative' }}>
+                            <img
+                                src={unsplashImage}
+                                alt="Unsplash Mosque"
+                                className="main-unsplash-image"
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
+                            {dailyContent && (
+                                <div className="main-daily-content-overlay">
+                                    <div className="main-daily-content-arab">{dailyContent.text}</div>
+                                    <div className="main-daily-content-translation">{dailyContent.translation}</div>
+                                    <div className="main-daily-content-source">{dailyContent.source}</div>
+                                </div>
+                            )}
+                            {photographer && (
+                                <div className="main-unsplash-photographer">
+                                    Photo by <a href={photographer.link} target="_blank" rel="noopener noreferrer">{photographer.name}</a> on Unsplash
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+                <div className="main-prayer-times-grid-container">
+                    {shiftedPrayerTimes.map(([prayer, time], idx) => (
+                    <div
+                        key={prayer}
+                        className={`main-prayer-times-grid-box${prayer === 'now' ? ' main-current-time-box' : ''}`}
+                    >
+                        {prayer === 'now' ? (
+                        <div>
+                            <div>Next: {isFriday && nameToNextPrayer === 'Dzuhur' ? "Jum'at" : nameToNextPrayer}</div>
+                            <div>{timeToNextPrayer}</div>
+                        </div>
+                        ) : (
+                        <>
+                            {isFriday && prayer === 'Dzuhur' ? "Jum'at" : prayer}: {time}
+                        </>
+                        )}
+                    </div>
+                    ))}
+                </div>
             </div>
+
+            <div className="main-running-text-container">
+                <div
+                    className="main-running-carousel-text animate-carousel"
+                    ref={carouselRef}
+                >
+                    <span
+                    key={animateKey}
+                    style={{
+                        animationDuration: `var(--running-text-duration, 20000ms)`
+                    }}
+                    >
+                    {runningTexts[runningTextIndex]}
+                    </span>
+                </div>
+                </div>
         </div>
     );
 };

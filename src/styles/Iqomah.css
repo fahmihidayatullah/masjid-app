@@ -14,13 +14,13 @@
 .iqomah-title {
     font-size: 4rem; /* Slightly larger font size for the title */
     font-weight: bold;
-    color: #4a90e2; /* Soft Blue for a calming effect */
+    color: white; /* Soft Blue for a calming effect */
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Subtle shadow for visibility */
     margin-bottom: 10px; /* Reduce spacing below the title */
 }
 
 .iqomah-prayer-name {
-    font-size: 2.5rem; /* Adjust font size for the prayer name */
+    font-size: 3rem; /* Adjust font size for the prayer name */
     font-weight: bold;
     color: #f4c542; /* Golden Yellow for a softer highlight */
     text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7); /* Subtle shadow for visibility */
@@ -28,7 +28,7 @@
 }
 
 .iqomah-countdown {
-    font-size: 10rem; /* Larger font size for the countdown */
+    font-size: 12rem; /* Larger font size for the countdown */
     font-weight: bold;
     color: white; /* Keep the countdown text white for focus */
     text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7); /* Stronger shadow for emphasis */

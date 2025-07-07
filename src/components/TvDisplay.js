@@ -7,7 +7,7 @@ const TvDisplay = ({ mosqueName, onPrayerTime, runningText, setCurrentPage }) =>
     const [currentBackground, setCurrentBackground] = useState('youtube');
     const [unsplashImage, setUnsplashImage] = useState(''); // State to store Unsplash image URL
     const [dailyContent, setDailyContent] = useState(null); // State to store daily ayat or hadith
-    const [accessKey] = useState(config.accessKey);
+    const [accessKey] = useState(config.accessKeyUnsplash);
     const [youtubeUrl] = useState(config.youtubeUrl);
     const [currentTime, setCurrentTime] = useState(new Date());
     const [timeToNextPrayer, setTimeToNextPrayer] = useState('');
@@ -92,7 +92,7 @@ const TvDisplay = ({ mosqueName, onPrayerTime, runningText, setCurrentPage }) =>
         const interval = setInterval(() => {
             setCurrentBackground((prev) => {
                 if (prev === 'youtube') {
-                    fetchUnsplashImage(); // Fetch a new image when switching to Unsplash
+                    fetchUnsplashImage();
                 }
                 return prev === 'youtube' ? 'unsplash' : 'youtube';
             });
@@ -137,11 +137,10 @@ const TvDisplay = ({ mosqueName, onPrayerTime, runningText, setCurrentPage }) =>
     ];
 
     useEffect(() => {
-        // Select daily content based on the day of the year
-        const today = new Date();
-        const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
-        const selectedContent = contentList[dayOfYear % contentList.length]; // Rotate through contentList
-        setDailyContent(selectedContent);
+        // tampilkan konten harian berurutan setelah menampilkan youtube
+        const randomIndex = Math.floor(Math.random() * contentList.length);
+        
+        setDailyContent(contentList[randomIndex]);
     }, []);
 
     // Update the current time every second

@@ -20,7 +20,6 @@ src/
   components/
     App.js
     TvDisplay.js
-    Main.js
     Iqomah.js
     Setting.js
   styles/
@@ -44,7 +43,7 @@ src/
    ```
 
 3. **Konfigurasi**
-   - Edit file `src/components/config.js` untuk mengisi `youtubeUrl` dan `accessKey` Unsplash.
+   - Edit file `.env` di root project Anda untuk mengatur konfigurasi yang dibutuhkan.
 
 4. **Jalankan aplikasi**
    ```bash
@@ -56,15 +55,21 @@ src/
 
 ## Konfigurasi
 
-Edit file `src/components/config.js`:
+Edit file `.env` di root project Anda untuk mengatur konfigurasi berikut:
 
-```js
-const config = {
-  youtubeUrl: "https://www.youtube.com/embed/your_stream_id",
-  accessKey: "YOUR_UNSPLASH_ACCESS_KEY"
-};
-export default config;
+```env
+REACT_APP_YOUTUBE_URL=https://www.youtube.com/embed/your_stream_id
+REACT_APP_RUNNING_TEXT=Tulisan berjalan di sini
+REACT_APP_UNSPLASH_ACCESS_KEY=YOUR_UNSPLASH_ACCESS_KEY
+REACT_APP_MOSQUE_NAME=Nama Masjid Anda
 ```
+
+> **Catatan:**  
+> Setelah mengubah file `.env`, lakukan langkah berikut:
+> 1. **Jika mode development:**  
+>    Restart aplikasi dengan perintah `npm start`.
+> 2. **Jika ingin build untuk production:**  
+>    Jalankan perintah `npm run build` untuk menghasilkan folder `build` yang siap dideploy.
 
 ## Kebutuhan
 

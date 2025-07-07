@@ -9,15 +9,18 @@
 }
 
 .background-container {
-    flex: 1;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     width: 100%;
-    height: calc(100% - 60px); /* Kurangi tinggi running-text */
+    height: calc(100vh - 70px - 60px); /* 70px = mosque-name, 60px = running-text */
     overflow: hidden;
-    position: relative;
+    position: absolute;
+    top: 70px;
+    left: 0;
+    background: #000;
+    z-index: 1;
 }
 
 .youtube-iframe {
@@ -48,49 +51,65 @@
 }
 
 .prayer-times-container {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr); /* 4 columns */
-    gap: 15px; /* Increase spacing between boxes */
-    background-color: var(--primary-color-transparent); /* Warna utama */
-    padding: 15px;
-    /* position: absolute; */
-    position: relative;
-    bottom: 60px; /* Place it just above the running text */
+    position: absolute;
+    left: 0;
     width: 100%;
+    bottom: 60px; /* setinggi running-text */
+    height: 25%;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    background-color: var(--primary-color-transparent);
+    padding: 15px;
     box-sizing: border-box;
 }
 
+/* Semua kotak memenuhi tinggi container */
 .prayer-times-box {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: white;
-    padding: 15px;
-    text-align: center;
+    box-sizing: border-box;
+    height: 100%;            /* penuhi 100% tinggi grid cell */
+    padding: 10px;           /* spasi dalam */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(255,255,255,0.1);
     border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-    font-size: 20px; /* Increase font size */
-    font-weight: bold;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+    color: #fff;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+    font-size: 1.2rem;       /* skala font sesuai */
 }
 
+/* Kotak “Now” lebih besar dan kontras */
 .current-time-box {
-    background-color: rgba(0, 128, 0, 0.8); /* Highlight the current time box */
-    color: white;
-    font-size: 22px; /* Slightly larger font size for the current time */
+    height: 100%;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0,128,0,0.85);
+    border: 3px solid #fff;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 20px;       /* font lebih besar */
     font-weight: bold;
-    border: 2px solid white;
 }
 
 .running-text-container {
     position: absolute;
+    left: 0;
     bottom: 0;
     width: 100%;
     height: 60px;
-    background-color: var(--primary-color); /* Warna utama */
+    background-color: var(--primary-color);
     color: white;
     overflow: hidden;
     display: flex;
     align-items: center;
     border-top: 1px solid rgba(255, 255, 255, 0.2);
+    z-index: 3;
 }
 
 .running-text {

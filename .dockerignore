@@ -1,0 +1,23 @@
+# .dockerignore
+
+node_modules
+npm-debug.log
+Dockerfile
+.dockerignore
+.git
+.gitignore
+.vscode
+.idea
+*.md
+*.log
+*.env.local
+*.env.development
+*.env.test
+*.env.production
+coverage
+build
+dist
+*.iml
+*.swp
+*.swo
+*.DS_Store
