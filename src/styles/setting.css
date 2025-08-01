@@ -6,21 +6,21 @@ body {
     background: linear-gradient(135deg, #FFDEE9, #B5FFFC); /* Soft gradient background */
     color: #333; /* Warna teks abu-abu gelap */
     min-height: 100vh;
-    justify-content: center; /* Pusatkan konten secara vertikal */
-    align-items: center;
+    overflow-y: auto; /* Pastikan body bisa scroll */
 }
 
 /* Kontainer utama */
 .setting-container {
     max-width: 700px; /* Lebar maksimum untuk form */
     width: 90%; /* Lebar kontainer */
-    margin: 50px auto; /* Pusatkan kontainer dengan jarak atas */
+    margin: 20px auto; /* Pusatkan kontainer dengan jarak atas lebih kecil */
     padding: 30px; /* Padding untuk ruang */
     background: #ffffff; /* Warna putih untuk kontras */
     border-radius: 15px; /* Sudut membulat */
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Bayangan lembut */
     font-family: Arial, sans-serif; /* Font yang user-friendly */
-    overflow-y: auto; /* Scroll jika konten terlalu banyak */
+    min-height: auto; /* Biarkan height mengikuti konten */
+    overflow-y: visible; /* Biarkan scroll terjadi di level page */
 }
 
 /* Judul Settings */

@@ -11,10 +11,20 @@ const IqomahCountdown = ({ prayerName, iqomahTime, onCountdownComplete }) => { /
 
 
     useEffect(() => {
-        if (!isJumatPrayer) {
             const audioInstance = new Audio('/assets/beep.mp3');
             setAudio(audioInstance);
-        }
+
+            // Tunggu sedikit agar audio ready, lalu mainkan 5x
+            setTimeout(() => {
+                for (let i = 0; i < 5; i++) {
+                    setTimeout(() => {
+                        audioInstance.currentTime = 0;
+                        audioInstance.play().catch((err) => {
+                            console.error('Audio playback failed:', err);
+                        });
+                    }, i * 1200); // play beep every 1.2 seconds
+                }
+            }, 500);
     }, [isJumatPrayer]);
 
     useEffect(() => {
@@ -44,18 +54,18 @@ const IqomahCountdown = ({ prayerName, iqomahTime, onCountdownComplete }) => { /
             .padStart(2, '0')}`;
     };
 
-    const playBeepSound = () => {
-        if (audio) {
-            for (let i = 0; i < 3; i++) {
-                setTimeout(() => {
-                    audio.currentTime = 0; // Reset audio to the beginning
-                    audio.play().catch((err) => {
-                        console.error('Audio playback failed:', err);
-                    });
-                }, i * 1500); // play beep every 1s 500ms
-            }
+    const playBeepSound = (n = 3) => {
+    if (audio) {
+        for (let i = 0; i < n; i++) {
+            setTimeout(() => {
+                audio.currentTime = 0; // Reset audio to the beginning
+                audio.play().catch((err) => {
+                    console.error('Audio playback failed:', err);
+                });
+            }, i * 1200); // play beep every 1s 200ms
         }
-    };
+    }
+};
 
     if (isJumatPrayer) {
         return (

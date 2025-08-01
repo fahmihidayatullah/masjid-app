@@ -2,18 +2,57 @@ import React, { useRef, useState, useEffect } from 'react';
 import '../styles/Main.css';
 import config from './config';
 import moment from 'moment-hijri';
+import kajianImage from '../assets/kajian.jpeg'; // Import kajian poster image
 import 'moment/locale/id'; // Import Indonesian locale for moment.js
 
 const Main = ({ mosqueName, onPrayerTime, runningText, setCurrentPage, iqomahTimes }) => {
     const [currentBackground, setCurrentBackground] = useState('youtube');
+    // Poster kajian, bisa diisi dari localStorage atau hardcode
+    const [kajianPoster, setKajianPoster] = useState(() => {
+        // Coba ambil dari localStorage, jika tidak ada pakai hardcode Google Drive
+        return (
+            localStorage.getItem('kajianPoster') ||
+            kajianImage
+        );
+    });
     const [unsplashImage, setUnsplashImage] = useState(''); // State to store Unsplash image URL
     const [dailyContent, setDailyContent] = useState(null); // State to store daily ayat or hadith
+    const [khatibData, setKhatibData] = useState({}); // State to store khatib data, default objek kosong
     const [accessKey] = useState(config.accessKeyUnsplash);
     const [youtubeUrl] = useState(
         localStorage.getItem('youtubeUrl') || ''
     );
+    
+    // Use refs to access latest values in interval
+    const khatibDataRef = useRef(khatibData);
+    const youtubeUrlRef = useRef(youtubeUrl);
+    
+    // Update refs when state changes
+    useEffect(() => {
+        khatibDataRef.current = khatibData;
+    }, [khatibData]);
+    
+    useEffect(() => {
+        youtubeUrlRef.current = youtubeUrl;
+    }, [youtubeUrl]);
     const [currentTime, setCurrentTime] = useState(new Date());
     const isFriday = currentTime.getDay() === 5; // 5 = Jum'at
+    
+    // Function to check if khatib date is Friday
+    const isKhatibDateFriday = (data = khatibData) => {
+        if (data?.tanggal) {
+            try {
+                const khatibDate = new Date(data.tanggal);
+                return khatibDate.getDay() === 5; // 5 = Friday
+            } catch (error) {
+                console.error('Error parsing khatib date:', error);
+                // Fallback to current day if date parsing fails
+                return currentTime.getDay() === 5;
+            }
+        }
+        // Fallback to current day if no khatib date is set
+        return currentTime.getDay() === 5;
+    };
     const [timeToNextPrayer, setTimeToNextPrayer] = useState('');
     const [nameToNextPrayer, setNameToNextPrayer] = useState('');
     const [prayerTimes, setPrayerTimes] = useState({}); // State for prayer times
@@ -22,6 +61,12 @@ const Main = ({ mosqueName, onPrayerTime, runningText, setCurrentPage, iqomahTim
         masehi: moment().format('DD-MM-YYYY'), // Gregorian date
     });
     const [photographer, setPhotographer] = useState(null); // State to store photographer
+    
+    // Helper function to check if khatib data is valid
+    const isKhatibDataValid = (data) => {
+        return data && typeof data === 'object' && (data.nama || data.tema || data.tanggal);
+    };
+    
     const hijriMonthsLatin = [
     "Muharram",
     "Safar",
@@ -126,10 +171,44 @@ const Main = ({ mosqueName, onPrayerTime, runningText, setCurrentPage, iqomahTim
             }
         };
 
+        // Pilih daily content saat component mount
+        const randomIndex = Math.floor(Math.random() * contentList.length);
+        setDailyContent(contentList[randomIndex]);
+
+        // Load khatib data dari localStorage
+        const loadKhatibData = () => {
+            const savedKhatib = localStorage.getItem('khatibData');
+            if (savedKhatib) {
+                try {
+                    const parsedData = JSON.parse(savedKhatib);
+                    // Pastikan URL foto sudah dalam format yang benar untuk Google Drive
+                    if (parsedData.foto && parsedData.foto.includes('drive.google.com/file/d/')) {
+                        const drivePattern = /https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/;
+                        const match = parsedData.foto.match(drivePattern);
+                        if (match && !parsedData.foto.includes('thumbnail?id=')) {
+                            const fileId = match[1];
+                            parsedData.foto = `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
+                        }
+                    }
+                    // Pastikan posisi default tersedia untuk data lama
+                    if (parsedData.positionX === undefined) parsedData.positionX = 50;
+                    if (parsedData.positionY === undefined) parsedData.positionY = 50;
+                    setKhatibData(parsedData);
+                } catch (error) {
+                    console.error('Error parsing khatib data:', error);
+                    setKhatibData({}); // fallback objek kosong jika error
+                }
+            } else {
+                setKhatibData({}); // fallback objek kosong jika tidak ada data
+            }
+        };
+
+        loadKhatibData();
         fetchUnsplashImage(); // Fetch image on component mount
 
         const interval = setInterval(() => {
             setCurrentBackground((prev) => {
+
                 if (prev === 'youtube') {
                     fetchUnsplashImage();
                     // Pilih daily content baru setiap kali masuk ke unsplash
@@ -143,10 +222,26 @@ const Main = ({ mosqueName, onPrayerTime, runningText, setCurrentPage, iqomahTim
                     const randomIndex = Math.floor(Math.random() * contentList.length);
                     setDailyContent(contentList[randomIndex]);
                     return 'unsplash';
+                } else if (prev === 'unsplash') {
+                    // Setelah unsplash, tampilkan poster kajian jika ada, jika tidak lanjut ke khatib/youtube
+                    if (isKhatibDataValid(khatibDataRef.current)) {
+                        return 'khatib';
+                    } else {
+                        return youtubeUrlRef.current ? 'youtube' : 'unsplash';
+                    }
+                } else if (prev === 'kajian') {
+                    // Setelah poster kajian, lanjut ke khatib jika ada data, jika tidak ke youtube/unsplash
+                    if (isKhatibDataValid(khatibDataRef.current)) {
+                        return 'khatib';
+                    } else {
+                        return youtubeUrlRef.current ? 'youtube' : 'unsplash';
+                    }
+                } else if (prev === 'khatib') {
+                    return youtubeUrlRef.current ? 'youtube' : 'unsplash';
                 }
-                return prev === 'youtube' ? 'unsplash' : 'youtube';
+                return 'unsplash';
             });
-        }, 5 * 60 * 1000); // Switch background every 2 minutes
+        }, 1 * 15 * 1000); // Switch background every 15 seconds (for testing, change back to 5 * 60 * 1000 for production)
 
         return () => clearInterval(interval); // Cleanup interval on component unmount
     }, []);
@@ -284,10 +379,9 @@ const Main = ({ mosqueName, onPrayerTime, runningText, setCurrentPage, iqomahTim
 
     const shiftedPrayerTimes = getShiftedPrayerTimes();
 
-    const runningTexts = [
-        "Masjid Al Muqorrobin menerima Infaq dan Shodaqoh Jama'ah melalui nomor rekening BSI: 7720004008 a.n. Masjid Al Muqorrobin",
-        "Hai orang-orang beriman, apabila diseru untuk menunaikan shalat Jum'at, maka bersegeralah kamu kepada mengingat Allah dan tinggalkanlah jual beli. Yang demikian itu lebih baik bagimu jika kamu mengetahui.",
-        "Dan di hari Jum'at pahala bersedekah dilipatgandakan (HR. Ibnu Khuzaimah)."
+    // Use runningText from props or default array
+    const runningTexts = runningText && runningText.length > 0 ? runningText : [
+        "Masjid Al Muqorrobin menerima Infaq dan Shodaqoh Jama'ah melalui nomor rekening BSI: 7720004008 a.n. Masjid Al Muqorrobin"
     ];
 
     const [runningTextIndex, setRunningTextIndex] = useState(0);
@@ -358,7 +452,7 @@ const Main = ({ mosqueName, onPrayerTime, runningText, setCurrentPage, iqomahTim
             {/* Content Area */}
             <div className="main-content-area">
                 <div className="main-background-container">
-                    {currentBackground === 'youtube' && youtubeUrl ? (
+                    {currentBackground === 'youtube' && youtubeUrl && (
                         <iframe
                             src={youtubeUrl}
                             title="Makkah Live Stream"
@@ -366,7 +460,7 @@ const Main = ({ mosqueName, onPrayerTime, runningText, setCurrentPage, iqomahTim
                             allowFullScreen
                             className="main-youtube-iframe"
                         />
-                    ) : null}
+                    )}
                     {((currentBackground === 'unsplash') || (currentBackground === 'youtube' && !youtubeUrl)) && unsplashImage && (
                         <div className="main-unsplash-wrapper" style={{ width: '100%', height: '100%', position: 'relative' }}>
                             <img
@@ -385,6 +479,206 @@ const Main = ({ mosqueName, onPrayerTime, runningText, setCurrentPage, iqomahTim
                             {photographer && (
                                 <div className="main-unsplash-photographer">
                                     Photo by <a href={photographer.link} target="_blank" rel="noopener noreferrer">{photographer.name}</a> on Unsplash
+                                </div>
+                            )}
+                        </div>
+                    )}
+                    {currentBackground === 'kajian' && kajianPoster && (
+                        <div className="main-kajian-poster-wrapper" style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#222', position: 'relative' }}>
+                            <img
+                                src={kajianPoster}
+                                alt="Poster Kajian"
+                                style={{
+                                    maxWidth: '90%',
+                                    maxHeight: '90%',
+                                    borderRadius: '20px',
+                                    boxShadow: '0 8px 32px rgba(0,0,0,0.7)',
+                                    border: '4px solid #fff',
+                                    background: '#fff',
+                                    objectFit: 'contain'
+                                }}
+                                onError={e => { e.target.style.display = 'none'; }}
+                            />
+                        </div>
+                    )}
+                    {currentBackground === 'khatib' && (
+                        <div className="main-khatib-poster" style={{ 
+                            width: '100%', 
+                            height: '100%', 
+                            backgroundImage: unsplashImage ? `url(${unsplashImage})` : 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)',
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center',
+                            backgroundRepeat: 'no-repeat',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            color: 'white',
+                            textAlign: 'center',
+                            padding: '40px',
+                            position: 'relative',
+                            minHeight: '100%'
+                        }}>
+                            {/* Debug info */}
+                            {console.log('Rendering khatib page with data:', khatibData, 'tanggal:', khatibData?.tanggal, 'isKhatibDateFriday:', isKhatibDateFriday())}
+                            {/* Dark overlay for better text readability - only if using unsplash image */}
+                            {unsplashImage && (
+                                <div style={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    width: '100%',
+                                    height: '100%',
+                                    backgroundColor: 'rgba(0,0,0,0.7)',
+                                    zIndex: 1
+                                }}></div>
+                            )}
+                            <div style={{ 
+                                background: 'rgba(255,255,255,0.15)', 
+                                padding: '60px', 
+                                borderRadius: '20px',
+                                backdropFilter: 'blur(15px)',
+                                border: '2px solid rgba(255,255,255,0.3)',
+                                maxWidth: '800px',
+                                width: '100%',
+                                position: 'relative',
+                                zIndex: 2
+                            }}>
+                                <h1 style={{ 
+                                    fontSize: '4rem', 
+                                    marginBottom: '30px',
+                                    textShadow: '3px 3px 6px rgba(0,0,0,0.8)',
+                                    fontWeight: 'bold'
+                                }}>
+                                    {isKhatibDateFriday() ? 'Khotbah Jum\'at' : 'Ustadz Hari Ini'}
+                                </h1>
+                                {/* Tampilkan tanggal khatib jika ada, atau tanggal hari ini */}
+                                <div style={{ 
+                                    fontSize: khatibData?.tanggal ? '1.8rem' : '1.5rem', 
+                                    marginBottom: '20px',
+                                    color: khatibData?.tanggal ? '#FFD700' : 'rgba(255,215,0,0.7)',
+                                    textShadow: '2px 2px 4px rgba(0,0,0,0.8)',
+                                    fontWeight: 'bold',
+                                    fontStyle: khatibData?.tanggal ? 'normal' : 'italic'
+                                }}>
+                                    {khatibData?.tanggal ? (
+                                        new Date(khatibData.tanggal).toLocaleDateString('id-ID', { 
+                                            weekday: 'long', 
+                                            year: 'numeric', 
+                                            month: 'long', 
+                                            day: 'numeric' 
+                                        })
+                                    ) : (
+                                        `${currentTime.toLocaleDateString('id-ID', { 
+                                            weekday: 'long', 
+                                            day: 'numeric',
+                                            month: 'long'
+                                        })}`
+                                    )}
+                                </div>
+                                {/* Foto Khatib atau fallback */}
+                                {khatibData?.foto ? (
+                                    <div style={{ 
+                                        marginBottom: '30px',
+                                        display: 'flex',
+                                        justifyContent: 'center'
+                                    }}>
+                                        <img 
+                                            src={khatibData.foto} 
+                                            alt="Foto Khatib"
+                                            style={{
+                                                width: '200px',
+                                                height: '200px',
+                                                borderRadius: '50%',
+                                                objectFit: 'cover',
+                                                objectPosition: `${khatibData.positionX || 50}% ${khatibData.positionY || 50}%`,
+                                                border: '5px solid white',
+                                                boxShadow: '0 8px 25px rgba(0,0,0,0.5)'
+                                            }}
+                                            onError={(e) => {
+                                                if (khatibData.foto.includes('drive.google.com')) {
+                                                    const drivePattern = /\/id\/([a-zA-Z0-9_-]+)/;
+                                                    const match = khatibData.foto.match(drivePattern) || 
+                                                                 khatibData.foto.match(/file\/d\/([a-zA-Z0-9_-]+)/);
+                                                    if (match) {
+                                                        const fileId = match[1];
+                                                        const altFormats = [
+                                                            `https://drive.google.com/uc?id=${fileId}`,
+                                                            `https://drive.google.com/uc?export=view&id=${fileId}`,
+                                                            `https://drive.google.com/thumbnail?id=${fileId}&sz=w500`,
+                                                            `https://lh3.googleusercontent.com/d/${fileId}=w1000`
+                                                        ];
+                                                        for (const altUrl of altFormats) {
+                                                            if (altUrl !== khatibData.foto) {
+                                                                e.target.src = altUrl;
+                                                                return;
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                                e.target.style.display = 'none';
+                                            }}
+                                            onLoad={(e) => {
+                                                // Photo loaded successfully
+                                            }}
+                                        />
+                                    </div>
+                                ) : (
+                                    <div style={{
+                                        marginBottom: '30px',
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                        height: '200px'
+                                    }}>
+                                        <span style={{
+                                            color: 'rgba(255,255,255,0.7)',
+                                            fontSize: '1.5rem',
+                                            fontStyle: 'italic'
+                                        }}>
+                                            Tidak ada foto khatib
+                                        </span>
+                                    </div>
+                                )}
+                                <h2 style={{ 
+                                    fontSize: '3rem', 
+                                    marginBottom: '20px',
+                                    color: '#FFD700',
+                                    textShadow: '2px 2px 4px rgba(0,0,0,0.8)',
+                                    fontWeight: 'bold'
+                                }}>
+                                    {khatibData?.nama ? khatibData.nama : <span style={{color:'#fff'}}>Nama Khatib belum diisi</span>}
+                                </h2>
+                                <div style={{ 
+                                    fontSize: '2rem', 
+                                    marginBottom: '30px',
+                                    fontWeight: 'bold',
+                                    textShadow: '2px 2px 4px rgba(0,0,0,0.8)'
+                                }}>
+                                    {isKhatibDateFriday() ? 'Tema:' : 'Materi:'}
+                                </div>
+                                <div style={{ 
+                                    fontSize: '2.5rem', 
+                                    fontStyle: 'italic',
+                                    lineHeight: '1.4',
+                                    textShadow: '2px 2px 4px rgba(0,0,0,0.8)',
+                                    fontWeight: '500'
+                                }}>
+                                    "{khatibData?.tema ? khatibData.tema : (isKhatibDateFriday() ? 'Tema Khotbah belum diisi' : 'Materi belum diisi')}"
+                                </div>
+                            </div>
+                            {/* Photographer credit - positioned at bottom right - only show if using unsplash image */}
+                            {photographer && unsplashImage && (
+                                <div style={{ 
+                                    position: 'absolute',
+                                    bottom: '10px',
+                                    right: '15px',
+                                    fontSize: '12px',
+                                    color: 'rgba(255,255,255,0.8)',
+                                    textShadow: '1px 1px 2px rgba(0,0,0,0.8)',
+                                    zIndex: 2
+                                }}>
+                                    Photo by <a href={photographer.link} target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255,255,255,0.9)' }}>{photographer.name}</a> on Unsplash
                                 </div>
                             )}
                         </div>

@@ -1,17 +1,15 @@
 # Masjid App
 
-Aplikasi TV Display untuk Masjid, menampilkan jadwal sholat, countdown iqomah, running text, live streaming YouTube, dan gambar inspiratif dari Unsplash.
+Aplikasi TV Display untuk Masjid dengan sistem CCTV streaming, menampilkan jadwal sholat, countdown iqomah, running text, live streaming YouTube, gambar inspiratif, dan monitoring CCTV real-time menggunakan MediaMTX.
 
 ## Fitur Utama
 
 - **Tampilan Jadwal Sholat**: Menampilkan waktu sholat harian secara otomatis.
 - **Countdown Iqomah**: Hitung mundur waktu iqomah setelah adzan.
-- **Live Streaming YouTube**: Tampilkan live stream (misal: Masjidil Haram) di layar utama.
-- **Gambar Unsplash**: Bergantian dengan live stream, tampilkan gambar masjid dari Unsplash.
+- **Live Streaming YouTube**: Tampilkan live stream (misal: Masjidil Haram) di Random Ayat
 - **Running Text**: Informasi berjalan di bagian bawah layar.
 - **Mode Setting**: Ubah nama masjid dan running text sesuai kebutuhan.
-- **Tampilan Fullscreen**: Mode layar penuh untuk YouTube atau gambar Unsplash.
-- **Responsive**: Tampilan optimal untuk TV/monitor besar.
+- **Tampilan Fullscreen**: Mode layar penuh untuk YouTube, gambar Unsplash, atau 
 
 ## Struktur Folder
 
