@@ -29,10 +29,10 @@ const Setting = ({
             try {
                 return JSON.parse(saved);
             } catch {
-                return { nama: '', tema: '', foto: '', positionX: 50, positionY: 50 };
+                return { nama: '', tema: '', tanggal: '', foto: '', positionX: 50, positionY: 50 };
             }
         }
-        return { nama: '', tema: '', foto: '', positionX: 50, positionY: 50 };
+        return { nama: '', tema: '', tanggal: '', foto: '', positionX: 50, positionY: 50 };
     });
 
     const handleIqomahChange = (key, value) => {
@@ -94,6 +94,17 @@ const Setting = ({
             ...prev,
             [field]: processedValue
         }));
+    };
+
+    // Fungsi untuk memeriksa apakah tanggal adalah hari Jum'at
+    const isDateFriday = (dateString) => {
+        if (!dateString) return null;
+        try {
+            const date = new Date(dateString);
+            return date.getDay() === 5; // 5 = Friday
+        } catch {
+            return null;
+        }
     };
 
     const handleSave = () => {
@@ -215,6 +226,49 @@ const Setting = ({
                                         placeholder="Masukkan tema khotbah"
                                         style={{ width: '100%', height: '80px', resize: 'vertical' }}
                                     />
+                                </div>
+                                <div style={{ marginBottom: 12 }}>
+                                    <label style={{ display: 'block', marginBottom: 4, fontWeight: 'bold' }}>Tanggal Khatib:</label>
+                                    <input
+                                        type="date"
+                                        value={khatibData.tanggal || ''}
+                                        onChange={(e) => handleKhatibChange('tanggal', e.target.value)}
+                                        className="setting-input"
+                                        style={{ width: '100%', marginBottom: 8 }}
+                                    />
+                                    <div style={{ fontSize: '12px', color: '#666', marginBottom: 4 }}>
+                                        Pilih tanggal untuk khatib Jum'at. Sistem akan otomatis memeriksa apakah tanggal yang dipilih adalah hari Jum'at.
+                                    </div>
+                                    {khatibData.tanggal && (
+                                        <div style={{
+                                            padding: '8px',
+                                            borderRadius: '4px',
+                                            fontSize: '12px',
+                                            backgroundColor: isDateFriday(khatibData.tanggal) === true ? '#d4edda' : 
+                                                           isDateFriday(khatibData.tanggal) === false ? '#f8d7da' : '#fff3cd',
+                                            border: `1px solid ${isDateFriday(khatibData.tanggal) === true ? '#c3e6cb' : 
+                                                    isDateFriday(khatibData.tanggal) === false ? '#f5c6cb' : '#ffeaa7'}`,
+                                            color: isDateFriday(khatibData.tanggal) === true ? '#155724' : 
+                                                  isDateFriday(khatibData.tanggal) === false ? '#721c24' : '#856404'
+                                        }}>
+                                            {isDateFriday(khatibData.tanggal) === true ? 
+                                                '✅ Tanggal yang dipilih adalah hari Jum\'at' :
+                                                isDateFriday(khatibData.tanggal) === false ?
+                                                '⚠️ Peringatan: Tanggal yang dipilih bukan hari Jum\'at' :
+                                                '❓ Format tanggal tidak valid'
+                                            }
+                                            {isDateFriday(khatibData.tanggal) === true && (
+                                                <div style={{ marginTop: 4, fontWeight: 'bold' }}>
+                                                    Tanggal: {new Date(khatibData.tanggal).toLocaleDateString('id-ID', { 
+                                                        weekday: 'long', 
+                                                        year: 'numeric', 
+                                                        month: 'long', 
+                                                        day: 'numeric' 
+                                                    })}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                                 <div style={{ marginBottom: 12 }}>
                                     <label style={{ display: 'block', marginBottom: 4, fontWeight: 'bold' }}>URL Foto Khatib:</label>

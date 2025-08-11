@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import '../styles/Main.css';
 import config from './config';
 import moment from 'moment-hijri';
-import kajianImage from '../assets/kajian.jpeg'; // Import kajian poster image
+// import kajianImage from '../assets/kajian.jpeg'; // Import kajian poster image
 import 'moment/locale/id'; // Import Indonesian locale for moment.js
 
 const Main = ({ mosqueName, onPrayerTime, runningText, setCurrentPage, iqomahTimes }) => {
@@ -12,7 +12,7 @@ const Main = ({ mosqueName, onPrayerTime, runningText, setCurrentPage, iqomahTim
         // Coba ambil dari localStorage, jika tidak ada pakai hardcode Google Drive
         return (
             localStorage.getItem('kajianPoster') ||
-            kajianImage
+            ''
         );
     });
     const [unsplashImage, setUnsplashImage] = useState(''); // State to store Unsplash image URL
@@ -576,8 +576,8 @@ const Main = ({ mosqueName, onPrayerTime, runningText, setCurrentPage, iqomahTim
                                         })}`
                                     )}
                                 </div>
-                                {/* Foto Khatib atau fallback */}
-                                {khatibData?.foto ? (
+                                {/* Foto Khatib - hanya tampil jika ada foto */}
+                                {khatibData?.foto && (
                                     <div style={{ 
                                         marginBottom: '30px',
                                         display: 'flex',
@@ -599,7 +599,7 @@ const Main = ({ mosqueName, onPrayerTime, runningText, setCurrentPage, iqomahTim
                                                 if (khatibData.foto.includes('drive.google.com')) {
                                                     const drivePattern = /\/id\/([a-zA-Z0-9_-]+)/;
                                                     const match = khatibData.foto.match(drivePattern) || 
-                                                                 khatibData.foto.match(/file\/d\/([a-zA-Z0-9_-]+)/);
+                                                                khatibData.foto.match(/file\/d\/([a-zA-Z0-9_-]+)/);
                                                     if (match) {
                                                         const fileId = match[1];
                                                         const altFormats = [
@@ -622,22 +622,6 @@ const Main = ({ mosqueName, onPrayerTime, runningText, setCurrentPage, iqomahTim
                                                 // Photo loaded successfully
                                             }}
                                         />
-                                    </div>
-                                ) : (
-                                    <div style={{
-                                        marginBottom: '30px',
-                                        display: 'flex',
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                        height: '200px'
-                                    }}>
-                                        <span style={{
-                                            color: 'rgba(255,255,255,0.7)',
-                                            fontSize: '1.5rem',
-                                            fontStyle: 'italic'
-                                        }}>
-                                            Tidak ada foto khatib
-                                        </span>
                                     </div>
                                 )}
                                 <h2 style={{ 
