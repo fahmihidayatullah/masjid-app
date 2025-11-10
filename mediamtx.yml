@@ -1,0 +1,25 @@
+logLevel: info
+
+rtsp: yes
+hls: yes
+hlsAddress: :8888
+hlsAlwaysRemux: yes
+
+paths:
+  cam1:
+    source: rtsp://admin:telkom2025@36.93.133.106:8054/Streaming/Channels/102
+    sourceProtocol: tcp
+    sourceOnDemand: no
+    
+  cam2:
+    runOnInit: ffmpeg -loglevel warning -rtsp_transport tcp -i rtsp://admin:telkom2025@36.93.133.106:8054/Streaming/Channels/202 -c:v copy -an -f rtsp rtsp://localhost:$RTSP_PORT/$MTX_PATH
+    runOnInitRestart: yes
+    
+  cam3:
+    runOnInit: ffmpeg -loglevel warning -rtsp_transport tcp -i rtsp://admin:telkom2025@36.93.133.106:8054/Streaming/Channels/302 -c:v copy -an -f rtsp rtsp://localhost:$RTSP_PORT/$MTX_PATH
+    runOnInitRestart: yes
+    
+  cam4:
+    source: rtsp://admin:telkom2025@36.93.133.106:8054/Streaming/Channels/402
+    sourceProtocol: tcp
+    sourceOnDemand: no

@@ -4,14 +4,16 @@ import TvDisplay from './TvDisplay';
 import Main from './Main';
 import IqomahCountdown from './Iqomah';
 import Setting from './setting';
-import '../styles/app.css'; // Import your CSS file for styling
-import logo from '../assets/logo.png'; // Import your logo image
-import config from './config'; // Import your configuration file
+import Deteksi from './Deteksi';
+import CCTV from './cctv'; // Import komponen CCTV baru
+import '../styles/app.css';
+import logo from '../assets/logo.png';
+import config from './config';
 
 const App = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const [currentPage, setCurrentPage] = useState('welcome'); // 'countdown', 'shaf', 'blank', 'tv'
+    const [currentPage, setCurrentPage] = useState('welcome'); // 'countdown', 'shaf', 'blank', 'tv', 'deteksi', 'cctv'
     const [currentIqomahTime, setCurrentIqomahTime] = useState(0);
     const [currentPrayerName, setCurrentPrayerName] = useState('');
     
@@ -33,15 +35,15 @@ const App = () => {
         localStorage.getItem('youtubeUrl') || config.youtubeUrl || ''
     );
     const getIqomahTimes = () => {
-    const saved = localStorage.getItem('iqomahTimes');
-    if (saved) {
-        try {
-        return JSON.parse(saved);
-        } catch {
-        return config.iqomahTimes;
+        const saved = localStorage.getItem('iqomahTimes');
+        if (saved) {
+            try {
+                return JSON.parse(saved);
+            } catch {
+                return config.iqomahTimes;
+            }
         }
-    }
-    return config.iqomahTimes;
+        return config.iqomahTimes;
     };
 
     const [iqomahTimes, setIqomahTimes] = useState(getIqomahTimes());
@@ -52,6 +54,8 @@ const App = () => {
         if (page === 'main') navigate('/main');
         else if (page === 'setting') navigate('/setting');
         else if (page === 'tv') navigate('/tv');
+        else if (page === 'deteksi') navigate('/deteksi');
+        else if (page === 'cctv') navigate('/cctv'); // Tambahkan navigasi CCTV
         else if (page === 'welcome') navigate('/');
         // Internal states like countdown, shaf, blank don't change URL but stay on current route
     };
@@ -62,6 +66,8 @@ const App = () => {
         if (path === '/main') setCurrentPage('main');
         else if (path === '/setting') setCurrentPage('setting');
         else if (path === '/tv') setCurrentPage('tv');
+        else if (path === '/deteksi') setCurrentPage('deteksi');
+        else if (path === '/cctv') setCurrentPage('cctv'); // Tambahkan deteksi path CCTV
         else setCurrentPage('welcome');
     }, [location.pathname]);
 
@@ -151,6 +157,12 @@ const App = () => {
                             <button className="welcome-button" onClick={() => navigateToPage('setting')}>
                                 Setting
                             </button>
+                            <button className="welcome-button" onClick={() => navigateToPage('deteksi')}>
+                                Deteksi Jamaah
+                            </button>
+                            <button className="welcome-button" onClick={() => navigateToPage('cctv')}>
+                                Monitor CCTV
+                            </button>
                         </div>
                     </div>
                 } />
@@ -184,6 +196,20 @@ const App = () => {
                         mosqueName={mosqueName}
                         onPrayerTime={handlePrayerTime}
                         runningText={runningText}
+                        setCurrentPage={navigateToPage}
+                    />
+                } />
+
+                <Route path="/deteksi" element={
+                    <Deteksi
+                        mosqueName={mosqueName}
+                        setCurrentPage={navigateToPage}
+                    />
+                } />
+
+                <Route path="/cctv" element={
+                    <CCTV
+                        mosqueName={mosqueName}
                         setCurrentPage={navigateToPage}
                     />
                 } />

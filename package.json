@@ -25,8 +25,11 @@
   "license": "ISC",
   "description": "Masjid Prayer Times",
   "dependencies": {
+    "@tensorflow-models/coco-ssd": "^2.2.3",
+    "@tensorflow/tfjs": "^4.22.0",
     "cors": "^2.8.5",
     "express": "^5.1.0",
+    "hls.js": "^1.6.9",
     "moment-hijri": "^3.0.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
