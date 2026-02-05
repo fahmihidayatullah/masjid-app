@@ -1,0 +1,450 @@
+/* RekapJamaah.css */
+
+.rekap-container {
+  padding: 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.rekap-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.rekap-header h2 {
+  margin: 0;
+  color: #333;
+  font-size: 2rem;
+}
+
+.btn-back {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+}
+
+.btn-back:hover {
+  background: #5568d3;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Filters Section */
+.filters-section {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.filter-group label {
+  font-weight: 600;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.filter-input {
+  padding: 0.75rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+  min-width: 150px;
+}
+
+.filter-input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.btn-export {
+  padding: 0.75rem 1.5rem;
+  background: #27ae60;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-export:hover {
+  background: #229954;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Statistics Summary */
+.stats-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: #777;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.stat-value {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #667eea;
+}
+
+/* Table View */
+.table-wrapper {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.rekap-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.rekap-table thead {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.rekap-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.rekap-table tbody tr {
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s ease;
+}
+
+.rekap-table tbody tr:hover {
+  background-color: #f8f9ff;
+}
+
+.rekap-table td {
+  padding: 1rem;
+}
+
+.date-cell {
+  font-weight: 600;
+  color: #333;
+}
+
+.count-cell {
+  text-align: center;
+  font-weight: 500;
+  color: #555;
+}
+
+.total-cell {
+  text-align: center;
+  font-weight: bold;
+  color: #667eea;
+  font-size: 1.1rem;
+}
+
+.empty-cell {
+  text-align: center;
+  padding: 3rem;
+  color: #999;
+  font-style: italic;
+}
+
+/* Stats Table */
+.stats-table-wrapper {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.stats-table-wrapper h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.stats-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.stats-table th {
+  background: #f5f5f5;
+  padding: 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  color: #555;
+  border-bottom: 2px solid #ddd;
+}
+
+.stats-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.stats-table .prayer-name {
+  font-weight: 600;
+  color: #667eea;
+}
+
+/* Chart View */
+.chart-container {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.chart-container h3 {
+  margin-top: 0;
+  margin-bottom: 2rem;
+  color: #333;
+  text-align: center;
+}
+
+.bar-chart {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-end;
+  height: 400px;
+  padding: 1rem;
+  border-bottom: 2px solid #ddd;
+  overflow-x: auto;
+}
+
+.bar-item {
+  flex: 1;
+  min-width: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.bar-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column-reverse;
+  border-radius: 4px 4px 0 0;
+  overflow: hidden;
+}
+
+.bar-segment {
+  position: absolute;
+  left: 0;
+  right: 0;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.bar-segment:hover {
+  opacity: 0.8;
+}
+
+.bar-label {
+  font-size: 0.7rem;
+  color: #666;
+  transform: rotate(-45deg);
+  white-space: nowrap;
+  margin-top: 1.5rem;
+}
+
+.bar-value {
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: #667eea;
+}
+
+.chart-legend {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.legend-color {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+}
+
+.legend-item span {
+  font-size: 0.9rem;
+  color: #555;
+  font-weight: 500;
+}
+
+/* Prayer Chart */
+.prayer-chart {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.prayer-chart h3 {
+  margin-top: 0;
+  margin-bottom: 2rem;
+  color: #333;
+  text-align: center;
+}
+
+.prayer-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.prayer-bar-item {
+  display: grid;
+  grid-template-columns: 100px 1fr 100px;
+  align-items: center;
+  gap: 1rem;
+}
+
+.prayer-bar-label {
+  font-weight: 600;
+  color: #555;
+  text-align: right;
+}
+
+.prayer-bar-wrapper {
+  background: #f0f0f0;
+  border-radius: 20px;
+  height: 40px;
+  overflow: hidden;
+  position: relative;
+}
+
+.prayer-bar-fill {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 1rem;
+  border-radius: 20px;
+  transition: width 0.5s ease;
+  position: relative;
+}
+
+.prayer-bar-value {
+  color: white;
+  font-weight: bold;
+  font-size: 1rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.prayer-bar-avg {
+  font-size: 0.9rem;
+  color: #777;
+  text-align: center;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .rekap-container {
+    padding: 1rem;
+  }
+
+  .rekap-header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .rekap-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .filters-section {
+    flex-direction: column;
+  }
+
+  .filter-input {
+    width: 100%;
+  }
+
+  .stats-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .rekap-table {
+    font-size: 0.9rem;
+  }
+
+  .rekap-table th,
+  .rekap-table td {
+    padding: 0.5rem;
+  }
+
+  .bar-chart {
+    height: 300px;
+  }
+
+  .prayer-bar-item {
+    grid-template-columns: 80px 1fr 80px;
+    gap: 0.5rem;
+  }
+}

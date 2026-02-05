@@ -1,2 +1,39 @@
+# Dependencies
 node_modules
+
+# Environment variables
 .env
+.env.local
+.env.production
+
+# Build output
+build
+dist
+
+# Vite
+.vite
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+mediamtx-custom.yml
+mediamtx
+mediamtx.exe
+mediamtx.tar.gz
+
+docs/*

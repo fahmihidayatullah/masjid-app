@@ -1,0 +1,42 @@
+services:
+  mediamtx:
+    build:
+      context: .
+      dockerfile: Dockerfile.mediamtx
+    container_name: mediamtx
+    ports:
+      - "8554:8554"  # RTSP port (optional, untuk testing langsung)
+      # Port 8888 HLS tidak exposed, diakses via nginx proxy
+    volumes:
+      - ./mediamtx-custom.yml:/mediamtx.yml:ro
+    restart: unless-stopped
+    networks:
+      - masjid-network
+
+  masjid-app:
+    image: fahmihidayatullah/masjid-app:mediamtx
+    container_name: masjid-app
+    # Port tidak exposed, diakses via nginx proxy
+    restart: unless-stopped
+    networks:
+      - masjid-network
+    depends_on:
+      - mediamtx
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-proxy
+    ports:
+      - "8091:80"  # Single port untuk akses masjid-app dan streaming
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    restart: unless-stopped
+    networks:
+      - masjid-network
+    depends_on:
+      - masjid-app
+      - mediamtx
+
+networks:
+  masjid-network:
+    driver: bridge

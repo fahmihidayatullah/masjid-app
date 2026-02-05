@@ -236,8 +236,13 @@
   font-weight: clamp(600, 7vw, 900);       /* font-weight proporsional, makin besar di layar besar */
   box-shadow: 0 2px 8px rgba(0,0,0,0.10);
   padding: 0.3em 0.7em;
-  transition: background 0.2s;
+  transition: background 0.2s, transform 0.1s;
   text-align: center;
+}
+
+.main-prayer-times-grid-box:hover:not(.main-current-time-box) {
+  background: rgba(255,255,255,0.15);
+  transform: scale(1.02);
 }
 
 /* Box waktu sekarang lebih menonjol */
@@ -416,4 +421,153 @@
   animation: running-text-move linear;
   animation-fill-mode: forwards;
   animation-duration: var(--running-text-duration, 30000ms);
+}
+
+/* Ramadhan Countdown Box */
+.main-ramadhan-countdown {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: linear-gradient(180deg, #F5E6D3 0%, #E8D4B8 100%);
+  border-radius: 12px;
+  padding: 20px 25px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  border: 2px solid #D4AF37;
+  z-index: 10;
+  text-align: center;
+}
+
+.countdown-ramadhan-title {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #8B4513;
+  margin-bottom: 12px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.countdown-numbers-container {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.countdown-number-box {
+  background: linear-gradient(180deg, #2c5f8d 0%, #1e3a5f 100%);
+  color: white;
+  font-size: 2.5rem;
+  font-weight: bold;
+  width: 50px;
+  height: 60px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3),
+              inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+  border: 2px solid #4a7ba7;
+}
+
+.countdown-day-left-text {
+  font-size: 0.95rem;
+  color: #8B4513;
+  letter-spacing: 2px;
+  font-weight: bold;
+}
+
+/* 1PM Message Popup */
+.message-popup-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.message-popup-content {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 20px;
+  padding: 40px 50px;
+  max-width: 700px;
+  max-height: 80%;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  border: 3px solid #D4AF37;
+  position: relative;
+  animation: slideUp 0.4s ease-out;
+}
+
+@keyframes slideUp {
+  from { 
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to { 
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.message-popup-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, transform 0.2s;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.message-popup-close:hover {
+  background: #c0392b;
+  transform: scale(1.1);
+}
+
+.message-popup-text {
+  color: #2c3e50;
+  font-size: 1.15rem;
+  line-height: 1.8;
+  text-align: justify;
+}
+
+.message-popup-text p {
+  margin-bottom: 15px;
+}
+
+.message-popup-text strong {
+  color: #006400;
+  font-size: 1.25rem;
+}
+
+.message-popup-quran {
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  padding: 20px;
+  border-left: 5px solid #4caf50;
+  border-radius: 8px;
+  font-style: italic;
+  color: #1b5e20;
+  font-weight: 500;
+  margin: 20px 0 !important;
+  font-size: 1.2rem !important;
 }

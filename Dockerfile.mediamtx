@@ -1,0 +1,16 @@
+# Stage 1: Install ffmpeg
+FROM alpine:latest AS ffmpeg-builder
+RUN apk add --no-cache ffmpeg
+
+# Stage 2: MediaMTX with ffmpeg
+FROM bluenviron/mediamtx:latest
+
+# Copy ffmpeg and dependencies from alpine
+COPY --from=ffmpeg-builder /usr/bin/ffmpeg /usr/bin/ffmpeg
+COPY --from=ffmpeg-builder /usr/bin/ffprobe /usr/bin/ffprobe
+COPY --from=ffmpeg-builder /lib /lib
+COPY --from=ffmpeg-builder /usr/lib /usr/lib
+
+# Override entrypoint and run mediamtx with custom config
+ENTRYPOINT ["/mediamtx"]
+CMD ["/mediamtx.yml"]
