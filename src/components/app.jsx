@@ -5,8 +5,9 @@ import Main from './Main.jsx';
 import IqomahCountdown from './Iqomah.jsx';
 import Setting from './setting.jsx';
 import Deteksi from './Deteksi.jsx';
-import CCTV from './cctv.jsx'; // Import komponen CCTV baru
+import CCTV from './cctv.jsx';
 import Stream from './Stream.jsx';
+import About from './About.jsx';
 import backgroundDetectionService from '../services/BackgroundDetectionService';
 import '../styles/app.css';
 import logo from '../assets/logo.png';
@@ -61,10 +62,10 @@ const App = () => {
         else if (page === 'setting') navigate('/setting');
         else if (page === 'tv') navigate('/tv');
         else if (page === 'deteksi') navigate('/deteksi');
-        else if (page === 'cctv') navigate('/cctv'); // Tambahkan navigasi CCTV
-        else if (page == 'stream') navigate('/stream');
+        else if (page === 'cctv') navigate('/cctv');
+        else if (page === 'stream') navigate('/stream');
+        else if (page === 'about') navigate('/about');
         else if (page === 'welcome') navigate('/');
-        // Internal states like countdown, shaf, blank don't change URL but stay on current route
     };
 
     // Check URL on component mount to set initial page
@@ -216,6 +217,9 @@ const App = () => {
                             <button className="welcome-button" style={{ minWidth: 140, height: 48, fontSize: '1.1rem' }} onClick={() => navigateToPage('stream')}>
                                 Live Stream
                             </button>
+                            <button className="welcome-button" style={{ minWidth: 140, height: 48, fontSize: '1.1rem' }} onClick={() => navigateToPage('about')}>
+                                About
+                            </button>
                         </div>
                     </div>
                 } />
@@ -272,6 +276,7 @@ const App = () => {
                 <Route path="/stream" element={
                     <Stream setCurrentPage={navigateToPage} />
                 } />
+                <Route path="/about" element={<About setCurrentPage={navigateToPage} />} />
             </Routes>
         </div>
     );
