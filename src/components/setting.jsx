@@ -31,6 +31,11 @@ const Setting = ({
     const [newStreamUrl, setNewStreamUrl] = useState(
         localStorage.getItem('streamUrl') || config.streamUrl || 'https://www.youtube.com/embed/{{code}}?autoplay=1&mute=1'
     );
+    // State untuk background interval (detik)
+    const [backgroundInterval, setBackgroundInterval] = useState(() => {
+        const saved = localStorage.getItem('backgroundInterval');
+        return saved ? parseInt(saved, 10) : 15;
+    });
     const [khatibData, setKhatibData] = useState(() => {
         const saved = localStorage.getItem('khatibData');
         if (saved) {
@@ -86,6 +91,12 @@ const Setting = ({
         }
     };
 
+    const handleBackgroundIntervalChange = (e) => {
+        let val = parseInt(e.target.value, 10);
+        if (isNaN(val) || val < 5) val = 5; // Minimal 5 detik
+        setBackgroundInterval(val);
+    };
+
     const handleSave = () => {
         setMosqueName(newMosqueName); // Update the mosque name in the parent component
         setRunningText(newRunningText.filter(text => text.trim() !== "")); // Update the running text array in the parent component, filter empty texts
@@ -100,6 +111,7 @@ const Setting = ({
         localStorage.setItem('khatibData', JSON.stringify(khatibData)); // Save the khatib data to local storage
         localStorage.setItem('eventDate', eventDate);
         localStorage.setItem('eventPoster', eventPoster);
+        localStorage.setItem('backgroundInterval', backgroundInterval);
         alert('Data has been updated!');
         setCurrentPage('main'); // Navigate back to the main display
     };
@@ -122,6 +134,29 @@ const Setting = ({
                                     onChange={(e) => setNewMosqueName(e.target.value)}
                                     className="setting-input"
                                 />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td className="setting-label" style={{ verticalAlign: 'top' }}>Iqomah Times :</td>
+                            <td>
+                                {iqomahKeys.map((key) => (
+                                    <div key={key} style={{ marginBottom: 8 }}>
+                                        <label style={{ marginRight: 8 }}>{key}:</label>
+                                        <select
+                                            value={newIqomahTimes[key] || 0}
+                                            onChange={e => handleIqomahChange(key, e.target.value)}
+                                            className="setting-input"
+                                            style={{ width: 70 }}
+                                        >
+                                            <option value={60}>1</option>
+                                            <option value={120}>2</option>
+                                            <option value={180}>3</option>
+                                            <option value={300}>5</option>
+                                            <option value={600}>10</option>
+                                            <option value={900}>15</option>
+                                        </select> Menit
+                                    </div>
+                                ))}
                             </td>
                         </tr>
                         <tr>
@@ -448,26 +483,20 @@ const Setting = ({
                             </td>
                         </tr>
                         <tr>
-                            <td className="setting-label" style={{ verticalAlign: 'top' }}>Iqomah Times :</td>
+                            <td className="setting-label">Background Interval:</td>
                             <td>
-                                {iqomahKeys.map((key) => (
-                                    <div key={key} style={{ marginBottom: 8 }}>
-                                        <label style={{ marginRight: 8 }}>{key}:</label>
-                                        <select
-                                            value={newIqomahTimes[key] || 0}
-                                            onChange={e => handleIqomahChange(key, e.target.value)}
-                                            className="setting-input"
-                                            style={{ width: 70 }}
-                                        >
-                                            <option value={60}>1</option>
-                                            <option value={120}>2</option>
-                                            <option value={180}>3</option>
-                                            <option value={300}>5</option>
-                                            <option value={600}>10</option>
-                                            <option value={900}>15</option>
-                                        </select> Menit
-                                    </div>
-                                ))}
+                                <input
+                                    type="number"
+                                    min="5"
+                                    value={backgroundInterval}
+                                    onChange={handleBackgroundIntervalChange}
+                                    className="setting-input"
+                                    style={{ width: 80, marginRight: 8 }}
+                                />
+                                detik
+                                <div style={{ fontSize: '12px', color: '#666', marginTop: 4 }}>
+                                    Interval pergantian background (minimal 5 detik)
+                                </div>
                             </td>
                         </tr>
                     </tbody>

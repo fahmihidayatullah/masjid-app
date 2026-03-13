@@ -318,6 +318,25 @@ const Main = ({ mosqueName, onPrayerTime, runningText, setCurrentPage, iqomahTim
     }
 };
 
+    // State untuk interval background (detik)
+    const [backgroundInterval, setBackgroundInterval] = useState(() => {
+        // Cek localStorage, default 15 detik jika tidak ada
+        const saved = localStorage.getItem('backgroundInterval');
+        return saved ? parseInt(saved, 10) : 15;
+    });
+
+    // Listen perubahan backgroundInterval dari localStorage (misal dari halaman setting)
+    useEffect(() => {
+        const handleStorageChange = () => {
+            const saved = localStorage.getItem('backgroundInterval');
+            if (saved && parseInt(saved, 10) !== backgroundInterval) {
+                setBackgroundInterval(parseInt(saved, 10));
+            }
+        };
+        window.addEventListener('storage', handleStorageChange);
+        return () => window.removeEventListener('storage', handleStorageChange);
+    }, [backgroundInterval]);
+
     useEffect(() => {
         // Fetch a random image from Unsplash
         const fetchUnsplashImage = async () => {
@@ -387,38 +406,45 @@ const Main = ({ mosqueName, onPrayerTime, runningText, setCurrentPage, iqomahTim
         loadKhatibData();
         fetchUnsplashImage(); // Fetch image on component mount
 
-        const interval = setInterval(() => {
-            setCurrentBackground((prev) => {
-                if (prev === 'youtube') {
-                    fetchUnsplashImage();
-                    const randomIndex = Math.floor(Math.random() * contentList.length);
-                    setDailyContent(contentList[randomIndex]);
-                }
-                if (!youtubeUrl) {
-                    fetchUnsplashImage();
-                    const randomIndex = Math.floor(Math.random() * contentList.length);
-                    setDailyContent(contentList[randomIndex]);
-                    return 'unsplash';
-                } else if (prev === 'unsplash') {
-                    if (isKhatibDataValid(khatibDataRef.current)) {
-                        return 'khatib';
-                    } else if (isEventValid()) {
-                        return 'event';
-                    } else {
-                        return youtubeUrlRef.current ? 'youtube' : 'unsplash';
+        // Timer background interval, tergantung backgroundInterval (detik)
+        let interval = null;
+        function startInterval() {
+            interval = setInterval(() => {
+                setCurrentBackground((prev) => {
+                    if (prev === 'youtube') {
+                        fetchUnsplashImage();
+                        const randomIndex = Math.floor(Math.random() * contentList.length);
+                        setDailyContent(contentList[randomIndex]);
                     }
-                } else if (prev === 'event') {
-                    return youtubeUrlRef.current ? 'youtube' : 'unsplash';
-                } else if (prev === 'khatib') {
-                    const next = isEventValid() ? 'event' : (youtubeUrlRef.current ? 'youtube' : 'unsplash');
-                    return next;
-                }
-                return 'unsplash';
-            });
-        }, 1 * 15 * 1000); // Switch background every 15 seconds
+                    if (!youtubeUrl) {
+                        fetchUnsplashImage();
+                        const randomIndex = Math.floor(Math.random() * contentList.length);
+                        setDailyContent(contentList[randomIndex]);
+                        return 'unsplash';
+                    } else if (prev === 'unsplash') {
+                        if (isKhatibDataValid(khatibDataRef.current)) {
+                            return 'khatib';
+                        } else if (isEventValid()) {
+                            return 'event';
+                        } else {
+                            return youtubeUrlRef.current ? 'youtube' : 'unsplash';
+                        }
+                    } else if (prev === 'event') {
+                        return youtubeUrlRef.current ? 'youtube' : 'unsplash';
+                    } else if (prev === 'khatib') {
+                        const next = isEventValid() ? 'event' : (youtubeUrlRef.current ? 'youtube' : 'unsplash');
+                        return next;
+                    }
+                    return 'unsplash';
+                });
+            }, backgroundInterval * 1000); // Switch background sesuai interval
+        }
+        startInterval();
 
-        return () => clearInterval(interval); // Cleanup interval on component unmount
-    }, []);
+        return () => {
+            if (interval) clearInterval(interval);
+        };
+    }, [backgroundInterval]);
 
     // Reload event data from localStorage when component mounts or updates
     useEffect(() => {

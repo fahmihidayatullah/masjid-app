@@ -2,153 +2,213 @@
 body {
     margin: 0;
     padding: 0;
-    font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #FFDEE9, #B5FFFC); /* Soft gradient background */
-    color: #333; /* Warna teks abu-abu gelap */
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #5D3B0F, #A29B11);
+    color: #333;
     min-height: 100vh;
-    overflow-y: auto; /* Pastikan body bisa scroll */
+    overflow-y: auto;
 }
 
 /* Kontainer utama */
 .setting-container {
-    max-width: 700px; /* Lebar maksimum untuk form */
-    width: 90%; /* Lebar kontainer */
-    margin: 20px auto; /* Pusatkan kontainer dengan jarak atas lebih kecil */
-    padding: 30px; /* Padding untuk ruang */
-    background: #ffffff; /* Warna putih untuk kontras */
-    border-radius: 15px; /* Sudut membulat */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Bayangan lembut */
-    font-family: Arial, sans-serif; /* Font yang user-friendly */
-    min-height: auto; /* Biarkan height mengikuti konten */
-    overflow-y: visible; /* Biarkan scroll terjadi di level page */
+    max-width: 860px;
+    width: 94%;
+    margin: 28px auto 40px auto;
+    padding: 36px 40px 32px 40px;
+    background: #fffdf7;
+    border-radius: 18px;
+    box-shadow: 0 6px 32px rgba(93, 59, 15, 0.18);
+    font-family: 'Segoe UI', Arial, sans-serif;
+    min-height: auto;
+    overflow-y: visible;
 }
 
 /* Judul Settings */
 .setting-title {
-    font-size: 2rem; /* Ukuran font besar */
-    margin-bottom: 20px;
-    color: #333;
+    font-size: 1.8rem;
+    margin-bottom: 28px;
+    color: #5D3B0F;
     font-weight: bold;
     text-align: center;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 2px;
+    border-bottom: 2px solid #e8d9c5;
+    padding-bottom: 16px;
 }
 
 /* Tabel untuk form */
 .setting-table {
     width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 20px;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-bottom: 24px;
+}
+
+/* Baris tabel */
+.setting-table tr {
+    transition: background 0.15s;
+}
+
+.setting-table tr:nth-child(odd) td {
+    background-color: #fdf6ec;
+}
+
+.setting-table tr:nth-child(even) td {
+    background-color: #fffdf7;
+}
+
+.setting-table tr:not(:last-child) td {
+    border-bottom: 1px solid #e8d9c5;
 }
 
 /* Label untuk input */
 .setting-label {
     text-align: left;
-    font-size: 1rem; /* Ukuran font yang proporsional */
-    font-weight: bold;
-    padding: 10px 0; /* Padding vertikal untuk jarak */
-    color: #555;
-    vertical-align: middle; /* Pastikan label sejajar dengan input */
-    width: 35%; /* Lebar label */
+    font-size: 0.97rem;
+    font-weight: 600;
+    padding: 16px 20px 16px 12px;
+    color: #5D3B0F;
+    vertical-align: top;
+    width: 200px;
+    min-width: 160px;
+    white-space: nowrap;
+}
+
+/* Kolom isi input */
+.setting-table td:last-child {
+    padding: 14px 8px 14px 0;
+    vertical-align: top;
 }
 
 /* Input dan Textarea */
 .setting-input,
 .setting-textarea {
     width: 100%;
-    padding: 10px; /* Padding untuk kenyamanan */
-    font-size: 1rem; /* Ukuran font yang proporsional */
-    border: 1px solid #ccc;
-    border-radius: 8px; /* Sudut membulat */
+    padding: 10px 14px;
+    font-size: 0.97rem;
+    border: 1.5px solid #c9a97a;
+    border-radius: 8px;
     box-sizing: border-box;
-    background-color: #f9f9f9;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    background-color: #fffdf7;
+    color: #3a2200;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
 .setting-input:focus,
 .setting-textarea:focus {
-    border-color: #007bff; /* Warna biru saat fokus */
-    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Efek fokus */
+    border-color: #5D3B0F;
+    box-shadow: 0 0 0 3px rgba(93, 59, 15, 0.12);
     outline: none;
+    background-color: #fff;
 }
 
 /* Textarea khusus */
 .setting-textarea {
-    resize: none; /* Nonaktifkan resize */
+    resize: vertical;
+    min-height: 60px;
 }
 
 /* Grup tombol */
 .button-group {
     display: flex;
-    justify-content: space-between; /* Pisahkan tombol Save dan Back */
-    gap: 10px; /* Jarak antar tombol */
-    margin-top: 20px;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 28px;
+    flex-wrap: wrap;
 }
 
 /* Tombol Save */
 .setting-button {
-    flex: 1; /* Tombol menyesuaikan lebar */
-    padding: 15px;
-    font-size: 1.2rem;
+    flex: 1;
+    padding: 14px 20px;
+    font-size: 1.05rem;
+    font-weight: 600;
     color: white;
-    background-color: #00BFA6;
+    background-color: #5D3B0F;
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
     text-align: center;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+    transition: background-color 0.25s ease, transform 0.15s ease, box-shadow 0.2s ease;
+    box-shadow: 0 2px 8px rgba(93, 59, 15, 0.22);
+    letter-spacing: 0.5px;
 }
 
 .setting-button:hover {
-    background-color: #008C7A;
-    transform: scale(1.03);
+    background-color: #7a4e18;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(93, 59, 15, 0.30);
 }
 
 .setting-button:active {
-    transform: scale(0.97);
+    transform: translateY(0);
+    box-shadow: none;
 }
 
 /* Tombol Back */
 .back-button {
-    flex: 1; /* Tombol menyesuaikan lebar */
-    padding: 15px;
-    font-size: 1.2rem;
+    flex: 1;
+    padding: 14px 20px;
+    font-size: 1.05rem;
+    font-weight: 600;
     color: white;
-    background-color: #FF7043; /* Warna oranye untuk tombol Back */
+    background-color: #A29B11;
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
     text-align: center;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+    transition: background-color 0.25s ease, transform 0.15s ease, box-shadow 0.2s ease;
+    box-shadow: 0 2px 8px rgba(162, 155, 17, 0.22);
+    letter-spacing: 0.5px;
 }
 
 .back-button:hover {
-    background-color: #E64A19; /* Warna oranye lebih gelap */
-    transform: scale(1.03);
+    background-color: #857f0e;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(162, 155, 17, 0.30);
 }
 
 .back-button:active {
-    transform: scale(0.97);
+    transform: translateY(0);
+    box-shadow: none;
 }
 
 /* Responsivitas */
 @media (max-width: 768px) {
     .setting-container {
-        padding: 20px; /* Kurangi padding untuk layar kecil */
+        padding: 20px 14px;
+        width: 98%;
+    }
+
+    .setting-table,
+    .setting-table tbody,
+    .setting-table tr,
+    .setting-table td {
+        display: block;
+        width: 100%;
     }
 
     .setting-label {
-        font-size: 0.9rem; /* Ukuran font lebih kecil */
+        padding: 14px 10px 4px 10px;
+        width: 100%;
+        min-width: unset;
+        background: #f5e8d5;
+        border-radius: 6px 6px 0 0;
+        font-size: 0.92rem;
+        white-space: normal;
     }
 
-    .setting-input,
-    .setting-textarea {
-        font-size: 0.9rem; /* Ukuran font lebih kecil */
-        padding: 10px; /* Kurangi padding */
+    .setting-table td:last-child {
+        padding: 8px 10px 14px 10px;
     }
 
-    .setting-button {
-        font-size: 1rem; /* Ukuran font lebih kecil */
-        padding: 12px; /* Kurangi padding */
+    .setting-button,
+    .back-button {
+        font-size: 0.98rem;
+        padding: 12px;
+    }
+
+    .button-group {
+        flex-direction: column;
     }
 }
