@@ -101,12 +101,9 @@ const Deteksi = ({ mosqueName, setCurrentPage }) => {
             
             const localKey = `prayerTimes-${todayDate}`;
             const saved = localStorage.getItem(localKey);
-            console.log('🕌 Loading prayer times from localStorage:', localKey);
-            console.log('📦 Data found:', saved);
             
             if (saved) {
                 const allTimes = JSON.parse(saved);
-                console.log('✅ Prayer times loaded:', allTimes);
                 // Only use the 5 main prayer times
                 return {
                     Subuh: allTimes.Subuh || allTimes.subuh || '04:30',
@@ -149,11 +146,8 @@ const Deteksi = ({ mosqueName, setCurrentPage }) => {
             const localKey = `prayerTimes-${todayDate}`;
             const saved = localStorage.getItem(localKey);
             
-            console.log('🔄 Checking prayer times update...', localKey);
-            
             if (saved) {
                 const allTimes = JSON.parse(saved);
-                console.log('✅ Prayer times updated from localStorage:', allTimes);
                 setPrayerSchedule({
                     Subuh: allTimes.Subuh || allTimes.subuh || '04:30',
                     Dzuhur: allTimes.Dzuhur || allTimes.dzuhur || '12:00',
@@ -371,7 +365,7 @@ const Deteksi = ({ mosqueName, setCurrentPage }) => {
     // Hanya counting crossing jika window aktif (dari DeteksiService)
     const checkLineCrossing = (personId, currentCenter, videoWidth, videoHeight) => {
         if (!activePrayerWindow.active) {
-            console.log(`⏸️ Skipping line check - window not active. Prayer: ${activePrayerWindow.prayer || 'none'}`);
+            //console.log(`⏸️ Skipping line check - window not active. Prayer: ${activePrayerWindow.prayer || 'none'}`);
             return; // Tidak counting jika di luar window
         }
         const trajectory = personTrajectoryRef.current.get(personId) || [];
@@ -389,7 +383,7 @@ const Deteksi = ({ mosqueName, setCurrentPage }) => {
         personTrajectoryRef.current.set(personId, trajectory);
         
         if (trajectory.length < 3) {
-            console.log(`📍 Person ${personId} trajectory too short (${trajectory.length} points)`);
+            //console.log(`📍 Person ${personId} trajectory too short (${trajectory.length} points)`);
             return;
         }
         
@@ -407,23 +401,23 @@ const Deteksi = ({ mosqueName, setCurrentPage }) => {
             const currentZone = determinePersonZone(currentCenter, lineEndpoints, lineConfig);
             const previousZone = currentState[`${lineConfig.zone}Zone`];
             
-            console.log(`🔍 Person ${personId} @ ${lineConfig.zone}: prev=${previousZone}, curr=${currentZone}`);
+            //console.log(`🔍 Person ${personId} @ ${lineConfig.zone}: prev=${previousZone}, curr=${currentZone}`);
             
             if (previousZone !== 'unknown' && previousZone !== currentZone && currentZone !== 'on_line') {
                 const now = Date.now();
                 const lastCrossingTime = currentState[`last${lineConfig.zone.charAt(0).toUpperCase() + lineConfig.zone.slice(1)}Time`];
                 
-                console.log(`🚶 Person ${personId} crossed ${lineConfig.zone} line! (${previousZone} → ${currentZone}), last crossing: ${now - lastCrossingTime}ms ago`);
+                //console.log(`🚶 Person ${personId} crossed ${lineConfig.zone} line! (${previousZone} → ${currentZone}), last crossing: ${now - lastCrossingTime}ms ago`);
                 
                 if (now - lastCrossingTime > 2000) {
-                    console.log(`⏱️ Validating crossing for person ${personId}...`);
+                    //console.log(`⏱️ Validating crossing for person ${personId}...`);
                     if (validateCrossing(trajectory, lineEndpoints, lineConfig.zone)) {
-                        console.log(`✅ Crossing validated for person ${personId} at ${lineConfig.zone} line`);
+                        //console.log(`✅ Crossing validated for person ${personId} at ${lineConfig.zone} line`);
                         // Deteksi crossing pada garis ini
                         if (lineConfig.zone === 'entry') {
                             // Catat waktu crossing garis entry (hijau)
                             currentState.lastEntryCrossing = now;
-                            console.log(`🟢 Person ${personId} crossed ENTRY line at ${new Date().toLocaleTimeString()}`);
+                            //console.log(`🟢 Person ${personId} crossed ENTRY line at ${new Date().toLocaleTimeString()}`);
                             
                             // Cek apakah sebelumnya sudah lewat exit (merah) dalam 5 detik terakhir
                             // Jika ya, berarti ini adalah keluar (exit dulu, baru entry)
@@ -431,7 +425,7 @@ const Deteksi = ({ mosqueName, setCurrentPage }) => {
                                 setExitCount(prev => {
                                     const newCount = prev + 1;
                                     localStorage.setItem("exitCount", String(newCount));
-                                    console.log(`✅ EXIT confirmed for person ${personId} (crossed EXIT then ENTRY)`);
+                                    //console.log(`✅ EXIT confirmed for person ${personId} (crossed EXIT then ENTRY)`);
                                     return newCount;
                                 });
                                 currentState.lastExitTime = now;
@@ -442,7 +436,7 @@ const Deteksi = ({ mosqueName, setCurrentPage }) => {
                         } else if (lineConfig.zone === 'exit') {
                             // Catat waktu crossing garis exit (merah)
                             currentState.lastExitCrossing = now;
-                            console.log(`🔴 Person ${personId} crossed EXIT line at ${new Date().toLocaleTimeString()}`);
+                            //console.log(`🔴 Person ${personId} crossed EXIT line at ${new Date().toLocaleTimeString()}`);
                             
                             // Cek apakah sebelumnya sudah lewat entry (hijau) dalam 5 detik terakhir
                             // Jika ya, berarti ini adalah masuk (entry dulu, baru exit)
@@ -459,7 +453,7 @@ const Deteksi = ({ mosqueName, setCurrentPage }) => {
                                     setTotalJamaahDetected(totalUniqueRef.current);
                                     localStorage.setItem("totalJamaahDetected", String(totalUniqueRef.current));
                                     
-                                    console.log(`✅ ENTRY confirmed for person ${personId} (crossed ENTRY then EXIT) - Prayer: ${prayerName || 'N/A'}`);
+                                    //console.log(`✅ ENTRY confirmed for person ${personId} (crossed ENTRY then EXIT) - Prayer: ${prayerName || 'N/A'}`);
                                     return newCount;
                                 });
                                 currentState.lastEntryTime = now;
@@ -469,10 +463,10 @@ const Deteksi = ({ mosqueName, setCurrentPage }) => {
                             }
                         }
                     } else {
-                        console.log(`❌ Crossing validation failed for person ${personId} at ${lineConfig.zone} line`);
+                        //console.log(`❌ Crossing validation failed for person ${personId} at ${lineConfig.zone} line`);
                     }
                 } else {
-                    console.log(`⏸️ Skipping - too soon after last crossing (${now - lastCrossingTime}ms ago)`);
+                    //console.log(`⏸️ Skipping - too soon after last crossing (${now - lastCrossingTime}ms ago)`);
                 }
             }
             
@@ -746,23 +740,23 @@ const Deteksi = ({ mosqueName, setCurrentPage }) => {
         let cancelled = false;
         const loadModel = async () => {
             try {
-                console.log('🔄 Loading TensorFlow.js...');
+                //console.log('🔄 Loading TensorFlow.js...');
                 if (!window.tf) {
                     await loadScript("https://cdn.jsdelivr.net/npm/@tensorflow/tfjs", 'tf');
                 }
-                console.log('✅ TensorFlow.js loaded');
+                //console.log('✅ TensorFlow.js loaded');
                 
-                console.log('🔄 Loading COCO-SSD...');
+                //console.log('🔄 Loading COCO-SSD...');
                 if (!window.cocoSsd) {
                     await loadScript("https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd", 'cocoSsd');
                 }
-                console.log('✅ COCO-SSD library loaded');
+                //console.log('✅ COCO-SSD library loaded');
                 
-                console.log('🔄 Loading COCO-SSD model...');
+                //console.log('🔄 Loading COCO-SSD model...');
                 const m = await window.cocoSsd.load();
                 if (!cancelled) {
                     setOdModel(m);
-                    console.log("✅ COCO-SSD model ready");
+                    //console.log("✅ COCO-SSD model ready");
                 }
             } catch (e) {
                 console.error("❌ Failed loading detection libs:", e);
@@ -853,13 +847,13 @@ const Deteksi = ({ mosqueName, setCurrentPage }) => {
             const canDetect = video.readyState >= 2 && detectionEnabled && activePrayerWindow.active;
             
             if (!canDetect && activePrayerWindow.active) {
-                console.log('🔍 Debug Status Deteksi:', {
-                    videoReady: video.readyState >= 2,
-                    videoReadyState: video.readyState,
-                    detectionEnabled,
-                    windowActive: activePrayerWindow.active,
-                    prayerName: activePrayerWindow.prayer
-                });
+                // console.log('🔍 Debug Status Deteksi:', {
+                //     videoReady: video.readyState >= 2,
+                //     videoReadyState: video.readyState,
+                //     detectionEnabled,
+                //     windowActive: activePrayerWindow.active,
+                //     prayerName: activePrayerWindow.prayer
+                // });
             }
             
             if (canDetect) {

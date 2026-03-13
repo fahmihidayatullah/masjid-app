@@ -68,6 +68,7 @@ masjid-app/
      ```env
      REACT_APP_RTSP_STREAM_URL=/stream
      REACT_APP_YOUTUBE_URL=https://www.youtube.com/embed/your_stream_id
+     REACT_APP_STREAM_URL=https://www.youtube.com/embed/your_stream_id
      REACT_APP_MOSQUE_NAME=Nama Masjid Anda
      REACT_APP_RUNNING_TEXT=Tulisan berjalan di sini
      REACT_APP_UNSPLASH_ACCESS_KEY=YOUR_UNSPLASH_ACCESS_KEY
@@ -97,6 +98,7 @@ Edit file `.env` (atau `.env.example`) untuk mengatur:
 ```env
 REACT_APP_RTSP_STREAM_URL=/stream
 REACT_APP_YOUTUBE_URL=https://www.youtube.com/embed/your_stream_id
+REACT_APP_STREAM_URL=https://www.youtube.com/embed/your_stream_id
 REACT_APP_MOSQUE_NAME=Nama Masjid Anda
 REACT_APP_RUNNING_TEXT=Tulisan berjalan di sini
 REACT_APP_UNSPLASH_ACCESS_KEY=YOUR_UNSPLASH_ACCESS_KEY

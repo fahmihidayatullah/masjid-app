@@ -1,10 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 import config from './config';
 import '../styles/Main.css'; // reuse main style for fullscreen
 
-const Stream = ({ setCurrentPage }) => {
-  const youtubeUrl =  "https://www.youtube.com/embed/zH0H4brdpl4?autoplay=1&mute=1" || localStorage.getItem('youtubeUrl') || config.youtubeUrl || '';
-  const [showClose, setShowClose] = useState(false);
+const Stream = ({ setCurrentPage, streamUrl }) => {
+  const StreamUrl =  streamUrl || localStorage.getItem('streamUrl') || config.streamUrl || '';
   const iframeRef = useRef(null);
 
   useEffect(() => {
@@ -64,7 +63,7 @@ const Stream = ({ setCurrentPage }) => {
       {/* YouTube iframe */}
       <iframe
         ref={iframeRef}
-        src={youtubeUrl}
+        src={StreamUrl}
         title="Live YouTube Stream"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
         allowFullScreen

@@ -13,8 +13,13 @@ const Setting = ({
   iqomahTimes,
   setIqomahTimes,
   youtubeUrl,
-  setYoutubeUrl
+  setYoutubeUrl,
+  setStreamUrl,
+  streamUrl
 }) => {
+    // State untuk event
+    const [eventDate, setEventDate] = useState(localStorage.getItem('eventDate') || '');
+    const [eventPoster, setEventPoster] = useState(localStorage.getItem('eventPoster') || '');
     const [newMosqueName, setNewMosqueName] = useState(mosqueName);
     const [newRunningText, setNewRunningText] = useState(
         Array.isArray(runningText) ? runningText : [runningText || ""]
@@ -22,6 +27,9 @@ const Setting = ({
     const [newIqomahTimes, setNewIqomahTimes] = useState({...iqomahTimes}); // Initialize running text state
     const [newYoutubeUrl, setNewYoutubeUrl] = useState(
         localStorage.getItem('youtubeUrl') || config.youtubeUrl || 'https://www.youtube.com/embed/{{code}}?autoplay=1&mute=1'
+    );
+    const [newStreamUrl, setNewStreamUrl] = useState(
+        localStorage.getItem('streamUrl') || config.streamUrl || 'https://www.youtube.com/embed/{{code}}?autoplay=1&mute=1'
     );
     const [khatibData, setKhatibData] = useState(() => {
         const saved = localStorage.getItem('khatibData');
@@ -60,39 +68,10 @@ const Setting = ({
         }
     };
 
-    // Fungsi untuk mengkonversi URL Google Drive menjadi direct link
-    const convertGoogleDriveUrl = (url) => {
-        if (!url) return url;
-        
-        // Pattern untuk URL Google Drive: https://drive.google.com/file/d/{FILE_ID}/view?usp=sharing
-        const drivePattern = /https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/;
-        const match = url.match(drivePattern);
-        
-        if (match) {
-            const fileId = match[1];
-            // Gunakan format thumbnail dengan ukuran besar untuk gambar yang lebih reliable
-            return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
-        }
-        
-        // Jika sudah dalam format direct link, return as is
-        if (url.includes('drive.google.com/uc?') || url.includes('drive.google.com/thumbnail?')) {
-            return url;
-        }
-        
-        return url; // Return original URL jika bukan Google Drive
-    };
-
     const handleKhatibChange = (field, value) => {
-        let processedValue = value;
-        
-        // Jika field adalah foto, konversi URL Google Drive
-        if (field === 'foto') {
-            processedValue = convertGoogleDriveUrl(value);
-        }
-        
         setKhatibData(prev => ({
             ...prev,
-            [field]: processedValue
+            [field]: value
         }));
     };
 
@@ -112,11 +91,15 @@ const Setting = ({
         setRunningText(newRunningText.filter(text => text.trim() !== "")); // Update the running text array in the parent component, filter empty texts
         setIqomahTimes(newIqomahTimes); // Update the iqomah times in the parent component
         setYoutubeUrl(newYoutubeUrl); // Update the YouTube URL in the parent component
+        setStreamUrl(newStreamUrl); // Update the Stream URL in the parent component
         localStorage.setItem('mosqueName', newMosqueName); // Save the mosque name to local storage
         localStorage.setItem('runningTextArray', JSON.stringify(newRunningText.filter(text => text.trim() !== ""))); // Save the running text array to local storage
         localStorage.setItem('iqomahTimes', JSON.stringify(newIqomahTimes)); // Save the iqomah times to local storage
         localStorage.setItem('youtubeUrl', newYoutubeUrl); // Save the YouTube URL to local storage
+        localStorage.setItem('streamUrl', newStreamUrl); // Save the Stream URL to local storage
         localStorage.setItem('khatibData', JSON.stringify(khatibData)); // Save the khatib data to local storage
+        localStorage.setItem('eventDate', eventDate);
+        localStorage.setItem('eventPoster', eventPoster);
         alert('Data has been updated!');
         setCurrentPage('main'); // Navigate back to the main display
     };
@@ -201,6 +184,21 @@ const Setting = ({
                                 className="setting-input"
                                 placeholder={newYoutubeUrl || 'https://www.youtube.com/embed/{{code}}?autoplay=1&mute=1'}
                             />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td className="setting-label">Stream URL:</td>
+                            <td>
+                            <input
+                                type="text"
+                                value={newStreamUrl}
+                                onChange={(e) => setNewStreamUrl(e.target.value)}
+                                className="setting-input"
+                                placeholder="https://example.com/stream atau /stream-path"
+                            />
+                            <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                                URL untuk RTSP/HLS stream lokal (contoh: /stream, http://localhost:8080/stream)
+                            </div>
                             </td>
                         </tr>
                         <tr>
@@ -415,6 +413,37 @@ const Setting = ({
                                             </div>
                                         </div>
                                     )}
+                                </div>
+                            </td>
+                        </tr>
+                        {/* Event Config Section setelah Khatib Jum'at */}
+                        <tr>
+                            <td className="setting-label" style={{ verticalAlign: 'top' }}>Konfigurasi Event:</td>
+                            <td>
+                                <div style={{ marginBottom: 12 }}>
+                                    <label style={{ display: 'block', marginBottom: 4, fontWeight: 'bold' }}>Tanggal Event:</label>
+                                    <input
+                                        type="date"
+                                        value={eventDate}
+                                        onChange={e => setEventDate(e.target.value)}
+                                        className="setting-input"
+                                        style={{ width: '100%', marginBottom: 12 }}
+                                    />
+                                </div>
+                                <div style={{ marginBottom: 12 }}>
+                                    <label style={{ display: 'block', marginBottom: 4, fontWeight: 'bold' }}>URL Poster/Video Event:</label>
+                                    <input
+                                        type="url"
+                                        value={eventPoster}
+                                        onChange={e => setEventPoster(e.target.value)}
+                                        className="setting-input"
+                                        placeholder="https://drive.google.com/file/d/FILE_ID/view?usp=sharing"
+                                        style={{ width: '100%', marginBottom: 4 }}
+                                    />
+                                    <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                                        Support gambar (JPG, PNG) atau video (MP4, MOV) dari Google Drive.<br/>
+                                        Cara: Klik kanan file → Get link → Paste di sini.
+                                    </div>
                                 </div>
                             </td>
                         </tr>

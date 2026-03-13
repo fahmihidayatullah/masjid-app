@@ -37,6 +37,9 @@ const App = () => {
     const [youtubeUrl, setYoutubeUrl] = useState(
         localStorage.getItem('youtubeUrl') || config.youtubeUrl || ''
     );
+    const [streamUrl, setStreamUrl] = useState(
+        localStorage.getItem('streamUrl') || config.streamUrl || ''
+    );
     const getIqomahTimes = () => {
         const saved = localStorage.getItem('iqomahTimes');
         if (saved) {
@@ -78,20 +81,16 @@ const App = () => {
 
     // Initialize Background Detection Service
     useEffect(() => {
-        console.log('🚀 Initializing Background Detection Service...');
-        
         // Start the service
         backgroundDetectionService.start();
         
         // Subscribe to status updates
         const unsubscribe = backgroundDetectionService.onStatusChange((status) => {
             setBackgroundServiceStatus(status);
-            console.log('Background service status:', status);
         });
         
         // Cleanup on unmount
         return () => {
-            console.log('🛑 Stopping Background Detection Service...');
             backgroundDetectionService.stop();
             unsubscribe();
         };
@@ -242,6 +241,8 @@ const App = () => {
                         setIqomahTimes={setIqomahTimes}
                         youtubeUrl={youtubeUrl}
                         setYoutubeUrl={setYoutubeUrl}
+                        streamUrl={streamUrl}
+                        setStreamUrl={setStreamUrl}
                     />
                 } />
                 

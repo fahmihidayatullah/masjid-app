@@ -69,7 +69,6 @@ const CCTV = ({ mosqueName, setCurrentPage }) => {
             script.src = 'https://cdn.jsdelivr.net/npm/hls.js@1.5.7';
             script.async = true;
             script.onload = () => {
-                console.log('✅ HLS.js loaded successfully');
                 resolve();
             };
             script.onerror = (error) => {
@@ -107,7 +106,7 @@ const CCTV = ({ mosqueName, setCurrentPage }) => {
             }
 
             if (Hls.isSupported()) {
-                console.log(`🎥 Initializing camera ${cameraId}: ${streamUrl}`);
+                // console.log(`🎥 Initializing camera ${cameraId}: ${streamUrl}`);
                 
                 const hls = new Hls({
                     debug: false,
@@ -139,7 +138,7 @@ const CCTV = ({ mosqueName, setCurrentPage }) => {
 
                 // Handle manifest parsed event
                 hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                    console.log(`✅ Camera ${cameraId} manifest loaded successfully`);
+
                     videoElement.play().catch(err => {
                         console.warn(`Camera ${cameraId} autoplay prevented:`, err);
                         // Try with muted
@@ -159,7 +158,7 @@ const CCTV = ({ mosqueName, setCurrentPage }) => {
                         
                         switch (data.type) {
                             case Hls.ErrorTypes.NETWORK_ERROR:
-                                console.log(`🔄 Camera ${cameraId}: Network recovery...`);
+                                // console.log(`🔄 Camera ${cameraId}: Network recovery...`);
                                 retryTimeouts.current[cameraId] = setTimeout(() => {
                                     if (hlsInstances.current[cameraId]) {
                                         hls.startLoad();
@@ -168,7 +167,7 @@ const CCTV = ({ mosqueName, setCurrentPage }) => {
                                 break;
                                 
                             case Hls.ErrorTypes.MEDIA_ERROR:
-                                console.log(`🔄 Camera ${cameraId}: Media recovery...`);
+                                // console.log(`🔄 Camera ${cameraId}: Media recovery...`);
                                 try {
                                     hls.recoverMediaError();
                                 } catch (err) {
@@ -180,7 +179,7 @@ const CCTV = ({ mosqueName, setCurrentPage }) => {
                                 break;
                                 
                             default:
-                                console.log(`🔄 Camera ${cameraId}: Restarting stream...`);
+                                // console.log(`🔄 Camera ${cameraId}: Restarting stream...`);
                                 hls.destroy();
                                 delete hlsInstances.current[cameraId];
                                 retryTimeouts.current[cameraId] = setTimeout(() => {
@@ -193,12 +192,12 @@ const CCTV = ({ mosqueName, setCurrentPage }) => {
 
                 // Handle quality level switching
                 hls.on(Hls.Events.LEVEL_SWITCHED, (event, data) => {
-                    console.log(`Camera ${cameraId}: Switched to quality level ${data.level}`);
+                    // console.log(`Camera ${cameraId}: Switched to quality level ${data.level}`);
                 });
 
                 // Handle stream ended
                 const onEnded = () => {
-                    console.log(`🔄 Camera ${cameraId}: Stream ended, reconnecting...`);
+                    // console.log(`🔄 Camera ${cameraId}: Stream ended, reconnecting...`);
                     retryTimeouts.current[cameraId] = setTimeout(() => {
                         setupRTSPStream(videoElement, streamUrl, cameraId);
                     }, 3000);
@@ -207,19 +206,19 @@ const CCTV = ({ mosqueName, setCurrentPage }) => {
 
                 // Handle stream stalled
                 const onStalled = () => {
-                    console.warn(`⚠️ Camera ${cameraId}: Stream stalled`);
+                    // console.warn(`⚠️ Camera ${cameraId}: Stream stalled`);
                 };
                 videoElement.addEventListener('stalled', onStalled);
 
                 // Handle waiting (buffering)
                 const onWaiting = () => {
-                    console.log(`⏳ Camera ${cameraId}: Buffering...`);
+                    // console.log(`⏳ Camera ${cameraId}: Buffering...`);
                 };
                 videoElement.addEventListener('waiting', onWaiting);
 
                 // Handle playing
                 const onPlaying = () => {
-                    console.log(`▶️ Camera ${cameraId}: Playing`);
+                    // console.log(`▶️ Camera ${cameraId}: Playing`);
                 };
                 videoElement.addEventListener('playing', onPlaying);
 
@@ -235,7 +234,7 @@ const CCTV = ({ mosqueName, setCurrentPage }) => {
 
             } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
                 // Native HLS support (Safari)
-                console.log(`🎥 Using native HLS for camera ${cameraId}`);
+                // console.log(`🎥 Using native HLS for camera ${cameraId}`);
                 videoElement.src = streamUrl;
                 videoElement.addEventListener('loadedmetadata', () => {
                     videoElement.play().catch(err => 
@@ -243,10 +242,10 @@ const CCTV = ({ mosqueName, setCurrentPage }) => {
                     );
                 });
             } else {
-                console.error(`❌ HLS not supported in this browser for camera ${cameraId}`);
+                // console.error(`❌ HLS not supported in this browser for camera ${cameraId}`);
             }
         } catch (error) {
-            console.error(`❌ Failed to setup stream for camera ${cameraId}:`, error);
+            // console.error(`❌ Failed to setup stream for camera ${cameraId}:`, error);
             // Retry after 5 seconds
             retryTimeouts.current[cameraId] = setTimeout(() => {
                 setupRTSPStream(videoElement, streamUrl, cameraId);
@@ -273,7 +272,7 @@ const CCTV = ({ mosqueName, setCurrentPage }) => {
 
         // Cleanup function
         return () => {
-            console.log('🧹 Cleaning up all camera streams...');
+            // console.log('🧹 Cleaning up all camera streams...');
             
             // Clear all retry timeouts
             Object.keys(retryTimeouts.current).forEach(key => {
@@ -306,7 +305,7 @@ const CCTV = ({ mosqueName, setCurrentPage }) => {
     useEffect(() => {
         try {
             localStorage.setItem('cctvCameras', JSON.stringify(cameras));
-            console.log('💾 Cameras saved to localStorage');
+            // console.log('💾 Cameras saved to localStorage');
         } catch (error) {
             console.error('Error saving cameras to localStorage:', error);
         }
@@ -321,13 +320,13 @@ const CCTV = ({ mosqueName, setCurrentPage }) => {
     const handleSave = useCallback(() => {
         setCameras(editedCameras);
         setIsEditing(false);
-        console.log('✅ Camera configuration saved');
+        // console.log('✅ Camera configuration saved');
     }, [editedCameras]);
 
     const handleCancel = useCallback(() => {
         setEditedCameras([...cameras]);
         setIsEditing(false);
-        console.log('❌ Edit cancelled');
+        // console.log('❌ Edit cancelled');
     }, [cameras]);
 
     const handleUrlChange = useCallback((id, newUrl) => {
@@ -349,13 +348,13 @@ const CCTV = ({ mosqueName, setCurrentPage }) => {
             name: `Kamera ${newId}`, 
             url: `http://localhost:8888/cam${newId}/index.m3u8` 
         }]);
-        console.log(`➕ Added camera ${newId}`);
+        // console.log(`➕ Added camera ${newId}`);
     }, [editedCameras]);
 
     const removeCamera = useCallback((id) => {
         if (editedCameras.length > 1) {
             setEditedCameras(prev => prev.filter(cam => cam.id !== id));
-            console.log(`🗑️ Removed camera ${id}`);
+            // console.log(`🗑️ Removed camera ${id}`);
         }
     }, [editedCameras.length]);
 

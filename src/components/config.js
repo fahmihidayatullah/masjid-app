@@ -1,6 +1,7 @@
 const config = {
     youtubeUrl: import.meta.env.VITE_YOUTUBE_URL || '', // https://www.youtube.com/embed/whjQYLyk6yU?autoplay=1&mute=1 
-    runningText: [
+    streamUrl: import.meta.env.VITE_STREAM_URL || '', // https://www.youtube.com/embed/whjQYLyk6yU?autoplay=1&mute=1
+    runningText: import.meta.env.VITE_RUNNING_TEXT ? import.meta.env.VITE_RUNNING_TEXT.split('|') : [  // pisahkan dengan '|'
         "Masjid Al Muqorrobin menerima Infaq dan Shodaqoh Jama'ah melalui nomor rekening BSI: 7720004008 a.n. Masjid Al Muqorrobin",
         "Dan di hari Jum'at pahala bersedekah dilipatgandakan (HR. Ibnu Khuzaimah)."
     ],

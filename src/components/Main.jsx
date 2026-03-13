@@ -3,23 +3,185 @@ import '../styles/Main.css';
 import config from './config';
 import moment from 'moment-hijri';
 // import kajianImage from '../assets/kajian.jpeg'; // Import kajian poster image
-import event from '/assets/tarhib1447.png'; // Import event poster image
 import 'moment/locale/id'; // Import Indonesian locale for moment.js
+
+// Helper component to robustly load Google Drive images with fallbacks
+// Helper component for Google Drive media (images or videos)
+const GoogleDriveMedia = ({ mediaUrl, alt = "Media", style = {}, onLoadError = null, isCircle = false }) => {
+    const [srcIndex, setSrcIndex] = useState(0);
+    const [failed, setFailed] = useState(false);
+    const [isVideo, setIsVideo] = useState(false);
+    const [useDirectVideo, setUseDirectVideo] = useState(false);
+    
+    // Extract fileId from various Google Drive URL formats
+    let fileId = null;
+    if (mediaUrl) {
+        const patterns = [
+            /[?&]id=([a-zA-Z0-9_-]+)/,
+            /file\/d\/([a-zA-Z0-9_-]+)/,
+            /thumbnail\?id=([a-zA-Z0-9_-]+)/,
+            /\/d\/([a-zA-Z0-9_-]+)/
+        ];
+        for (const pat of patterns) {
+            const match = mediaUrl.match(pat);
+            if (match) {
+                fileId = match[1];
+                break;
+            }
+        }
+    }
+    
+    // Check if URL indicates a video file or try to detect from extension
+    useEffect(() => {
+        if (mediaUrl) {
+            const videoExtensions = ['.mp4', '.webm', '.mov', '.avi', '.mkv', '.m4v'];
+            const isVideoFile = videoExtensions.some(ext => mediaUrl.toLowerCase().includes(ext));
+            setIsVideo(isVideoFile);
+        }
+    }, [mediaUrl]);
+    
+    // For videos, try iframe first, then fallback to direct video
+    if (fileId && (isVideo || !isCircle)) {
+        // Try iframe embed first
+        if (!useDirectVideo) {
+            return (
+                <iframe
+                    key={`iframe-${fileId}`}
+                    src={`https://drive.google.com/file/d/${fileId}/preview?autoplay=1`}
+                    style={{
+                        width: '100%',
+                        height: '100%',
+                        border: 'none',
+                        ...style
+                    }}
+                    allow="autoplay; fullscreen"
+                    allowFullScreen
+                    onError={() => {
+                        console.log('Iframe failed, trying direct video...');
+                        setUseDirectVideo(true);
+                    }}
+                />
+            );
+        }
+        
+        // Fallback: Try direct video with multiple source formats
+        const videoSources = [
+            `https://drive.google.com/uc?export=download&id=${fileId}`,
+            `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
+            `https://drive.google.com/uc?id=${fileId}`
+        ];
+        
+        return (
+            <video
+                key={`video-${fileId}`}
+                style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'contain',
+                    ...style
+                }}
+                controls
+                autoPlay
+                loop
+                muted
+                playsInline
+                onError={(e) => {
+                    console.error('Video playback error:', e);
+                    if (onLoadError) onLoadError();
+                    setFailed(true);
+                }}
+            >
+                {videoSources.map((src, idx) => (
+                    <source key={idx} src={src} type="video/mp4" />
+                ))}
+                Browser tidak support video tag.
+            </video>
+        );
+    }
+    
+    // Try all possible formats with different sizes for circle vs full image
+    const size = isCircle ? 'w1000' : 'w2000';
+    const srcList = fileId
+        ? [
+            `https://drive.google.com/thumbnail?id=${fileId}&sz=${size}`,
+            `https://lh3.googleusercontent.com/d/${fileId}=${size}`,
+            `https://drive.google.com/uc?id=${fileId}`,
+            `https://drive.google.com/uc?export=view&id=${fileId}`,
+            `https://lh3.googleusercontent.com/d/${fileId}`
+        ]
+        : [mediaUrl];
+
+    // Only try original URL as last resort if fileId not found
+    if (fileId && mediaUrl && !srcList.includes(mediaUrl)) {
+        srcList.push(mediaUrl);
+    }
+
+    if (failed) {
+        if (onLoadError) {
+            onLoadError();
+        }
+        return isCircle ? null : (
+            <div style={{ color: '#fff', textAlign: 'center', width: '100%' }}>
+                <div style={{ fontSize: '2rem', margin: '2em 0' }}>
+                    {isVideo ? 'Video' : 'Gambar'} tidak dapat ditampilkan.<br/>
+                    Periksa link Google Drive dan pastikan file dibagikan publik.<br/>
+                    <small style={{ fontSize: '1rem', marginTop: '1em', display: 'block' }}>
+                        Untuk video: Klik kanan file → Share → Anyone with the link can view
+                    </small>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <img
+            src={srcList[srcIndex]}
+            alt={alt}
+            style={style}
+            onError={() => {
+                if (srcIndex < srcList.length - 1) {
+                    setSrcIndex(srcIndex + 1);
+                } else {
+                    setFailed(true);
+                }
+            }}
+        />
+    );
+};
+
+// Alias for backward compatibility with images
+const GoogleDriveImage = (props) => <GoogleDriveMedia {...props} />;;
+
+// Alias for backward compatibility
+const EventPosterImage = ({ eventPoster }) => {
+    return (
+        <GoogleDriveMedia 
+            mediaUrl={eventPoster}
+            alt="Event Poster"
+            style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+                maxWidth: '100%',
+                maxHeight: '100%'
+            }}
+        />
+    );
+};
 
 const Main = ({ mosqueName, onPrayerTime, runningText, setCurrentPage, iqomahTimes }) => {
     const [currentBackground, setCurrentBackground] = useState('youtube');
-    // Poster kajian, bisa diisi dari localStorage atau hardcode
-    const [kajianPoster, setKajianPoster] = useState(() => {
-        // Coba ambil dari localStorage, jika tidak ada pakai hardcode Google Drive
-        return (
-            localStorage.getItem('kajianPoster') ||
-            ''
-        );
+    
+    // State untuk event date dan poster dari localStorage
+    const [eventDate, setEventDate] = useState(localStorage.getItem('eventDate') || '');
+    const [eventPoster, setEventPoster] = useState(() => {
+        const savedPoster = localStorage.getItem('eventPoster') || '';
+        // Don't convert here, let EventPosterImage component handle it
+        return savedPoster;
     });
     const [unsplashImage, setUnsplashImage] = useState(''); // State to store Unsplash image URL
     const [dailyContent, setDailyContent] = useState(null); // State to store daily ayat or hadith
     const [khatibData, setKhatibData] = useState({}); // State to store khatib data, default objek kosong
-    const [showPosterKegiatan, setShowPosterKegiatan] = useState(false); // State to control event poster display
     const [accessKey] = useState(config.accessKeyUnsplash);
     const [youtubeUrl] = useState(
         localStorage.getItem('youtubeUrl') || ''
@@ -63,13 +225,25 @@ const Main = ({ mosqueName, onPrayerTime, runningText, setCurrentPage, iqomahTim
         masehi: moment().format('DD-MM-YYYY'), // Gregorian date
     });
     const [photographer, setPhotographer] = useState(null); // State to store photographer
-    const [ramadhanCountdown, setRamadhanCountdown] = useState(0); // State for Ramadhan countdown (days only)
     const [show1PMMessage, setShow1PMMessage] = useState(false); // State for 1PM message popup
     const [shownMessagesForPrayers, setShownMessagesForPrayers] = useState([]); // Track which prayers have shown message today
     
     // Helper function to check if khatib data is valid
     const isKhatibDataValid = (data) => {
         return data && typeof data === 'object' && (data.nama || data.tema || data.tanggal);
+    };
+    
+    // Helper function to check if event is still valid (not expired)
+    const isEventValid = () => {
+        if (!eventDate || !eventPoster) {
+            return false;
+        }
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Set to start of day
+        const event = new Date(eventDate);
+        event.setHours(0, 0, 0, 0); // Set to start of day
+        const valid = today <= event;
+        return valid; // Event valid if today <= event date
     };
     
     const hijriMonthsLatin = [
@@ -162,7 +336,17 @@ const Main = ({ mosqueName, onPrayerTime, runningText, setCurrentPage, iqomahTim
                         `https://api.unsplash.com/photos/random?query=mosque&orientation=landscape&client_id=${accessKey}`
                     );
                     const data = await response.json();
-                    await fetch(`${data.links.download_location}?client_id=${accessKey}`);
+                    
+                    // Check if data is valid and has required properties
+                    if (!data || !data.urls || !data.user || !data.links) {
+                        console.error('Invalid Unsplash API response:', data);
+                        return;
+                    }
+                    
+                    // Trigger download endpoint (optional, for Unsplash analytics)
+                    if (data.links.download_location) {
+                        await fetch(`${data.links.download_location}?client_id=${accessKey}`).catch(() => {});
+                    }
 
                     setUnsplashImage(data.urls.full); // Set the image URL from Unsplash
                     const photographerInfo = { name: data.user.name, link: data.user.links.html };
@@ -186,15 +370,7 @@ const Main = ({ mosqueName, onPrayerTime, runningText, setCurrentPage, iqomahTim
             if (savedKhatib) {
                 try {
                     const parsedData = JSON.parse(savedKhatib);
-                    // Pastikan URL foto sudah dalam format yang benar untuk Google Drive
-                    if (parsedData.foto && parsedData.foto.includes('drive.google.com/file/d/')) {
-                        const drivePattern = /https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/;
-                        const match = parsedData.foto.match(drivePattern);
-                        if (match && !parsedData.foto.includes('thumbnail?id=')) {
-                            const fileId = match[1];
-                            parsedData.foto = `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
-                        }
-                    }
+                    // Don't convert foto URL here, let GoogleDriveImage component handle it
                     // Pastikan posisi default tersedia untuk data lama
                     if (parsedData.positionX === undefined) parsedData.positionX = 50;
                     if (parsedData.positionY === undefined) parsedData.positionY = 50;
@@ -226,21 +402,44 @@ const Main = ({ mosqueName, onPrayerTime, runningText, setCurrentPage, iqomahTim
                 } else if (prev === 'unsplash') {
                     if (isKhatibDataValid(khatibDataRef.current)) {
                         return 'khatib';
+                    } else if (isEventValid()) {
+                        return 'event';
                     } else {
                         return youtubeUrlRef.current ? 'youtube' : 'unsplash';
                     }
-                } else if (prev === 'kajian') {
-                    return 'event';
                 } else if (prev === 'event') {
                     return youtubeUrlRef.current ? 'youtube' : 'unsplash';
                 } else if (prev === 'khatib') {
-                    return 'event';
+                    const next = isEventValid() ? 'event' : (youtubeUrlRef.current ? 'youtube' : 'unsplash');
+                    return next;
                 }
                 return 'unsplash';
             });
-        }, 1 * 20 * 1000); // Switch background every 20 seconds (for testing)
+        }, 1 * 15 * 1000); // Switch background every 15 seconds
 
         return () => clearInterval(interval); // Cleanup interval on component unmount
+    }, []);
+
+    // Reload event data from localStorage when component mounts or updates
+    useEffect(() => {
+        const handleStorageChange = () => {
+            const newDate = localStorage.getItem('eventDate') || '';
+            const posterUrl = localStorage.getItem('eventPoster') || '';
+            // Don't convert here, let EventPosterImage component handle it
+            setEventDate(newDate);
+            setEventPoster(posterUrl);
+        };
+        
+        // Listen for storage changes
+        window.addEventListener('storage', handleStorageChange);
+        
+        // Also check periodically in case localStorage was updated in same tab
+        const interval = setInterval(handleStorageChange, 5000);
+        
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+            clearInterval(interval);
+        };
     }, []);
 
     // Fetch prayer times from API
@@ -310,23 +509,6 @@ const Main = ({ mosqueName, onPrayerTime, runningText, setCurrentPage, iqomahTim
             setShownMessagesForPrayers([]);
         }
     }, [currentTime, prayerTimes, shownMessagesForPrayers]);
-
-    // Calculate countdown to 1 Ramadhan 1447 H
-    useEffect(() => {
-        const calculateRamadhanCountdown = () => {
-            // 1 Ramadhan 1447 H
-            const ramadhan1447 = moment().iYear(1447).iMonth(8).iDate(1); // iMonth(8) = Ramadhan (0-indexed)
-            const now = moment();
-            const diff = ramadhan1447.diff(now, 'days');
-            
-            setRamadhanCountdown(diff > 0 ? diff : 0);
-        };
-
-        calculateRamadhanCountdown();
-        const timer = setInterval(calculateRamadhanCountdown, 60000); // Update every minute instead of every second
-
-        return () => clearInterval(timer);
-    }, []);
 
     // Check if 'Now' matches any prayer time and has an Iqomah
     useEffect(() => {
@@ -558,36 +740,9 @@ const Main = ({ mosqueName, onPrayerTime, runningText, setCurrentPage, iqomahTim
                             )}
                         </div>
                     )}
-                    {currentBackground === 'kajian' && kajianPoster && (
-                        <div className="main-kajian-poster-wrapper" style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#222', position: 'relative' }}>
-                            <img
-                                src={kajianPoster}
-                                alt="Poster Kajian"
-                                style={{
-                                    maxWidth: '90%',
-                                    maxHeight: '90%',
-                                    borderRadius: '20px',
-                                    boxShadow: '0 8px 32px rgba(0,0,0,0.7)',
-                                    border: '4px solid #fff',
-                                    background: '#fff',
-                                    objectFit: 'contain'
-                                }}
-                                onError={e => { e.target.style.display = 'none'; }}
-                            />
-                        </div>
-                    )}
-                    {currentBackground === 'event' && (
+                    {currentBackground === 'event' && isEventValid() && (
                         <div className="main-event-poster-wrapper" style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#000', position: 'relative' }}>
-                            <img
-                                src={event}
-                                alt="Event Poster"
-                                style={{
-                                    width: '100%',
-                                    height: '100%',
-                                    objectFit: 'cover'
-                                }}
-                                onError={e => { e.target.style.display = 'none'; }}
-                            />
+                            <EventPosterImage eventPoster={eventPoster} />
                         </div>
                     )}
                     {currentBackground === 'khatib' && (
@@ -608,8 +763,6 @@ const Main = ({ mosqueName, onPrayerTime, runningText, setCurrentPage, iqomahTim
                             position: 'relative',
                             minHeight: '100%'
                         }}>
-                            {/* Debug info */}
-                            {console.log('Rendering khatib page with data:', khatibData, 'tanggal:', khatibData?.tanggal, 'isKhatibDateFriday:', isKhatibDateFriday())}
                             {/* Dark overlay for better text readability - only if using unsplash image */}
                             {unsplashImage && (
                                 <div style={{
@@ -672,9 +825,10 @@ const Main = ({ mosqueName, onPrayerTime, runningText, setCurrentPage, iqomahTim
                                         display: 'flex',
                                         justifyContent: 'center'
                                     }}>
-                                        <img 
-                                            src={khatibData.foto} 
+                                        <GoogleDriveMedia
+                                            mediaUrl={khatibData.foto}
                                             alt="Foto Khatib"
+                                            isCircle={true}
                                             style={{
                                                 width: '200px',
                                                 height: '200px',
@@ -684,31 +838,8 @@ const Main = ({ mosqueName, onPrayerTime, runningText, setCurrentPage, iqomahTim
                                                 border: '5px solid white',
                                                 boxShadow: '0 8px 25px rgba(0,0,0,0.5)'
                                             }}
-                                            onError={(e) => {
-                                                if (khatibData.foto.includes('drive.google.com')) {
-                                                    const drivePattern = /\/id\/([a-zA-Z0-9_-]+)/;
-                                                    const match = khatibData.foto.match(drivePattern) || 
-                                                                khatibData.foto.match(/file\/d\/([a-zA-Z0-9_-]+)/);
-                                                    if (match) {
-                                                        const fileId = match[1];
-                                                        const altFormats = [
-                                                            `https://drive.google.com/uc?id=${fileId}`,
-                                                            `https://drive.google.com/uc?export=view&id=${fileId}`,
-                                                            `https://drive.google.com/thumbnail?id=${fileId}&sz=w500`,
-                                                            `https://lh3.googleusercontent.com/d/${fileId}=w1000`
-                                                        ];
-                                                        for (const altUrl of altFormats) {
-                                                            if (altUrl !== khatibData.foto) {
-                                                                e.target.src = altUrl;
-                                                                return;
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                                e.target.style.display = 'none';
-                                            }}
-                                            onLoad={(e) => {
-                                                // Photo loaded successfully
+                                            onLoadError={() => {
+                                                // Silently hide if all formats fail
                                             }}
                                         />
                                     </div>
@@ -781,17 +912,6 @@ const Main = ({ mosqueName, onPrayerTime, runningText, setCurrentPage, iqomahTim
                         )}
                     </div>
                     ))}
-                </div>
-                
-                {/* Countdown to Ramadhan */}
-                <div className="main-ramadhan-countdown">
-                    <div className="countdown-ramadhan-title">Ramadhan</div>
-                    <div className="countdown-numbers-container">
-                        {String(ramadhanCountdown).padStart(2, '0').split('').map((digit, idx) => (
-                            <div key={idx} className="countdown-number-box">{digit}</div>
-                        ))}
-                    </div>
-                    <div className="countdown-day-left-text">DAYS LEFT</div>
                 </div>
             </div>
 

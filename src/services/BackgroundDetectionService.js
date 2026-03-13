@@ -145,11 +145,11 @@ class BackgroundDetectionService {
   // Mulai service
   async start() {
     if (this.isRunning) {
-      console.log('Background detection service already running');
+      //console.log('Background detection service already running');
       return;
     }
     
-    console.log('🚀 Starting background detection service...');
+    //console.log('🚀 Starting background detection service...');
     this.isRunning = true;
     
     // Load AI model
@@ -164,7 +164,7 @@ class BackgroundDetectionService {
       
       if (window.active && !this.currentPrayerWindow) {
         // Mulai window baru
-        console.log(`✅ Prayer window started: ${window.prayerName}`);
+        //console.log(`✅ Prayer window started: ${window.prayerName}`);
         this.currentPrayerWindow = window;
         this.startDetection();
         this.emitStatus({ 
@@ -175,7 +175,7 @@ class BackgroundDetectionService {
         });
       } else if (!window.active && this.currentPrayerWindow) {
         // Window berakhir
-        console.log(`⏹️ Prayer window ended: ${this.currentPrayerWindow.prayerName}`);
+        //console.log(`⏹️ Prayer window ended: ${this.currentPrayerWindow.prayerName}`);
         this.stopDetection();
         this.currentPrayerWindow = null;
         this.emitStatus({ running: false });
@@ -206,7 +206,7 @@ class BackgroundDetectionService {
 
   // Stop service
   stop() {
-    console.log('⏹️ Stopping background detection service...');
+    //console.log('⏹️ Stopping background detection service...');
     this.isRunning = false;
     
     if (this.checkInterval) {
@@ -222,23 +222,23 @@ class BackgroundDetectionService {
   // Load AI detection model
   async loadDetectionModel() {
     try {
-      console.log('🔄 [Background] Loading TensorFlow.js...');
+      //console.log('🔄 [Background] Loading TensorFlow.js...');
       // Load TensorFlow.js
       if (!window.tf) {
         await this.loadScript('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs', 'tf');
       }
-      console.log('✅ [Background] TensorFlow.js loaded');
+      //console.log('✅ [Background] TensorFlow.js loaded');
       
-      console.log('🔄 [Background] Loading COCO-SSD...');
+      //console.log('🔄 [Background] Loading COCO-SSD...');
       // Load COCO-SSD model
       if (!window.cocoSsd) {
         await this.loadScript('https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd', 'cocoSsd');
       }
-      console.log('✅ [Background] COCO-SSD library loaded');
+      //console.log('✅ [Background] COCO-SSD library loaded');
       
-      console.log('🔄 [Background] Loading COCO-SSD model...');
+      //console.log('🔄 [Background] Loading COCO-SSD model...');
       this.detectionModel = await window.cocoSsd.load();
-      console.log('✅ [Background] Detection model ready');
+      //console.log('✅ [Background] Detection model ready');
     } catch (e) {
       console.error('❌ [Background] Failed to load detection model:', e);
     }
@@ -365,7 +365,7 @@ class BackgroundDetectionService {
   startDetection() {
     if (this.detectionInterval) return;
     
-    console.log('▶️ Starting detection loop...');
+    //console.log('▶️ Starting detection loop...');
     
     // Run detection every 500ms
     this.detectionInterval = setInterval(() => {
@@ -378,7 +378,7 @@ class BackgroundDetectionService {
     if (this.detectionInterval) {
       clearInterval(this.detectionInterval);
       this.detectionInterval = null;
-      console.log('⏸️ Detection loop stopped');
+      //console.log('⏸️ Detection loop stopped');
     }
   }
 
@@ -547,7 +547,7 @@ class BackgroundDetectionService {
     const currentTotal = parseInt(localStorage.getItem('totalJamaahDetected') || '0', 10);
     localStorage.setItem('totalJamaahDetected', String(currentTotal + 1));
     
-    console.log(`✅ Entry detected - Prayer: ${prayerName}, Count: ${counts[prayerName]}`);
+    //console.log(`✅ Entry detected - Prayer: ${prayerName}, Count: ${counts[prayerName]}`);
     
     this.emitStatus({
       running: true,
@@ -563,7 +563,7 @@ class BackgroundDetectionService {
     const newExit = currentExit + 1;
     localStorage.setItem('exitCount', String(newExit));
     
-    console.log(`✅ Exit detected - Count: ${newExit}`);
+    //console.log(`✅ Exit detected - Count: ${newExit}`);
   }
 
   // Helper functions
